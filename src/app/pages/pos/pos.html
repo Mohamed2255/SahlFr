@@ -1,0 +1,149 @@
+<div class="page-header">
+  <div>
+    <h1>نقطة البيع</h1>
+    <p>إنشاء فواتير المبيعات — بحث بالباركود أو الاسم</p>
+  </div>
+</div>
+
+<div class="pos-grid">
+  <div class="panel products-panel">
+    <div class="search-bar">
+      <input type="text" placeholder="🔍 ابحث بالاسم أو الكود..." [(ngModel)]="searchTerm" />
+      <input
+        type="text"
+        placeholder="📷 امسح الباركود..."
+        [(ngModel)]="barcodeInput"
+        (keyup.enter)="onBarcodeScan()"
+        class="barcode-input"
+      />
+      <button type="button" class="btn btn-primary btn-sm" (click)="onBarcodeScan()">إضافة</button>
+    </div>
+
+    @if (loading()) {
+      <div class="loading-state">جاري التحميل...</div>
+    } @else {
+      <div class="product-grid">
+        @for (product of filteredProducts(); track product.id) {
+          <button type="button" class="product-card" (click)="selectProduct(product); addToCart()" [class.low-stock]="product.stockQuantity <= product.minQuantity">
+            <strong>{{ product.name }}</strong>
+            <small>{{ product.sku }}</small>
+            <span class="stock">{{ product.stockQuantity }} {{ product.baseUnitName }}</span>
+            <span class="price">{{ formatCurrency(product.units[0]?.sellingPrice ?? 0) }}</span>
+          </button>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="panel cart-panel">
+    <h2>الفاتورة</h2>
+
+    <div class="form-row full">
+      <label>
+        <span>العميل</span>
+        <select [(ngModel)]="selectedCustomerId">
+          <option value="">عميل نقدي</option>
+          @for (c of customers(); track c.id) {
+            <option [value]="c.id">{{ c.name }} ({{ formatCurrency(c.balance) }})</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    @if (cart().length) {
+      <table>
+        <thead>
+          <tr>
+            <th>المنتج</th>
+            <th>الكمية</th>
+            <th>السعر</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (line of cart(); track $index; let i = $index) {
+            <tr>
+              <td>{{ line.product.name }}<br /><small class="muted">{{ line.unit.name }}</small></td>
+              <td>{{ line.quantity }}</td>
+              <td>{{ formatCurrency(line.quantity * line.unitPrice - (line.discountAmount ?? 0)) }}</td>
+              <td><button type="button" class="btn btn-danger btn-sm" (click)="removeFromCart(i)">×</button></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    } @else {
+      <p class="muted empty-cart">السلة فارغة — اختر منتجاً</p>
+    }
+
+    <div class="form-row">
+      <label><span>خصم الفاتورة</span><input type="number" [(ngModel)]="invoiceDiscount" min="0" /></label>
+      <label><span>الضريبة</span><input type="number" [(ngModel)]="taxAmount" min="0" /></label>
+      <label><span>طريقة الدفع</span>
+        <select [(ngModel)]="paymentMethod">
+          @for (m of paymentMethods; track m.value) {
+            <option [value]="m.value">{{ m.label }}</option>
+          }
+        </select>
+      </label>
+      <label><span>المبلغ المدفوع</span><input type="number" [(ngModel)]="paidAmount" min="0" /></label>
+    </div>
+
+    <div class="totals">
+      <div class="detail-row"><span>المجموع الفرعي</span><span>{{ formatCurrency(subTotal()) }}</span></div>
+      <div class="detail-row total-row"><span>الإجمالي</span><strong>{{ formatCurrency(total()) }}</strong></div>
+      @if (paidAmount < total()) {
+        <div class="detail-row due-row"><span>المتبقي (دين)</span><span class="badge danger">{{ formatCurrency(total() - paidAmount) }}</span></div>
+      }
+    </div>
+
+    <div class="cart-footer">
+      <button type="button" class="btn btn-primary" [disabled]="submitting() || !cart().length" (click)="submitSale()">
+        {{ submitting() ? 'جاري الحفظ...' : 'إتمام البيع' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="panel history-panel">
+  <h2>سجل المبيعات</h2>
+  <div class="history-list">
+    @for (sale of sales().slice(0, 10); track sale.id) {
+      <div class="history-item">
+        <button type="button" class="history-header" (click)="toggleSaleDetails(sale.id)">
+          <div>
+            <strong>{{ sale.saleNumber }}</strong>
+            <small>{{ formatDate(sale.saleDate) }} — {{ sale.cashierName }}
+              @if (sale.customerName) { — {{ sale.customerName }} }
+            </small>
+          </div>
+          <strong>{{ formatCurrency(sale.totalAmount) }}</strong>
+        </button>
+        @if (expandedSaleId() === sale.id) {
+          <div class="history-details">
+            @for (item of sale.items; track item.id) {
+              <div class="detail-row">
+                <span>{{ item.productName }} ({{ item.quantity }} {{ item.unitName }})</span>
+                <span>{{ formatCurrency(item.subTotal) }}</span>
+              </div>
+            }
+            @if (sale.dueAmount > 0) {
+              <div class="detail-row"><span class="badge danger">متبقي: {{ formatCurrency(sale.dueAmount) }}</span></div>
+            }
+            <button type="button" class="btn btn-secondary btn-sm" (click)="openInvoice(sale.id)">🖨️ عرض / طباعة</button>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>
+
+@if (showInvoice() && invoicePreview()) {
+  <div class="modal-backdrop" (click)="showInvoice.set(false)">
+    <div class="modal invoice-modal" (click)="$event.stopPropagation()">
+      <app-invoice-print [invoice]="invoicePreview()!" />
+      <div class="modal-actions no-print">
+        <button type="button" class="btn btn-ghost" (click)="showInvoice.set(false)">إغلاق</button>
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,102 @@
+<div class="page-header">
+  <div>
+    <h1>لوحة التحكم</h1>
+    <p>مرحباً {{ auth.currentUser()?.fullName }} — نظرة عامة على أداء عملك</p>
+  </div>
+</div>
+
+@if (loading()) {
+  <div class="loading-state">جاري تحميل البيانات...</div>
+} @else if (data(); as d) {
+  <div class="stats-grid">
+    <div class="stat-card accent">
+      <span class="stat-label">مبيعات اليوم</span>
+      <span class="stat-value">{{ formatCurrency(d.todaySales) }}</span>
+    </div>
+    <div class="stat-card success">
+      <span class="stat-label">إجمالي الإيرادات</span>
+      <span class="stat-value">{{ formatCurrency(d.totalRevenue) }}</span>
+    </div>
+    <div class="stat-card success">
+      <span class="stat-label">صافي الربح</span>
+      <span class="stat-value">{{ formatCurrency(d.totalProfit) }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">قيمة المخزون</span>
+      <span class="stat-value">{{ formatCurrency(d.inventoryValue) }}</span>
+    </div>
+    @if (auth.isAdmin()) {
+      <div class="stat-card warning">
+        <span class="stat-label">مشتريات اليوم</span>
+        <span class="stat-value">{{ formatCurrency(d.todayPurchases) }}</span>
+      </div>
+      <div class="stat-card danger">
+        <span class="stat-label">ديون العملاء</span>
+        <span class="stat-value">{{ formatCurrency(d.customerDebts) }}</span>
+      </div>
+      <div class="stat-card danger">
+        <span class="stat-label">مستحقات الموردين</span>
+        <span class="stat-value">{{ formatCurrency(d.vendorPayables) }}</span>
+      </div>
+    }
+    <div class="stat-card warning">
+      <span class="stat-label">منتجات منخفضة المخزون</span>
+      <span class="stat-value">{{ d.lowStockCount }}</span>
+    </div>
+  </div>
+
+  <div class="dashboard-grid">
+    <div class="panel chart-card">
+      <h2>مبيعات الأسبوع</h2>
+      <div class="chart-wrap">
+        <canvas #salesChart></canvas>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>الأكثر مبيعاً</h2>
+      @if (d.topSellingProducts.length) {
+        <div class="rank-list">
+          @for (item of d.topSellingProducts; track item.productName; let i = $index) {
+            <div class="rank-item">
+              <span class="rank-num">{{ i + 1 }}</span>
+              <div class="rank-info">
+                <strong>{{ item.productName }}</strong>
+                <small>{{ item.quantitySold }} وحدة — {{ formatCurrency(item.revenue) }}</small>
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <p class="muted">لا توجد مبيعات بعد</p>
+      }
+    </div>
+
+    <div class="panel">
+      <h2>آخر المعاملات</h2>
+      <div class="history-list">
+        @for (tx of d.recentTransactions; track tx.number) {
+          <div class="tx-row">
+            <div>
+              <span class="badge" [class.success]="tx.type === 'Sale'" [class.warning]="tx.type === 'Purchase'">
+                {{ tx.type === 'Sale' ? 'بيع' : 'شراء' }}
+              </span>
+              <strong>{{ tx.number }}</strong>
+              <small class="muted">{{ formatDate(tx.date) }}</small>
+            </div>
+            <strong>{{ formatCurrency(tx.amount) }}</strong>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="quick-links">
+    <a routerLink="/pos" class="quick-link">🛒 نقطة البيع</a>
+    <a routerLink="/products" class="quick-link">📦 المنتجات</a>
+    <a routerLink="/inventory" class="quick-link">📋 المخزون</a>
+    @if (auth.isAdmin()) {
+      <a routerLink="/reports" class="quick-link">📈 التقارير</a>
+    }
+  </div>
+}

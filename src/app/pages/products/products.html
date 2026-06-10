@@ -1,0 +1,99 @@
+<div class="page-header">
+  <div>
+    <h1>المنتجات</h1>
+    <p>إدارة المنتجات والأسعار والمخزون</p>
+  </div>
+  <div class="header-actions">
+    <input type="search" placeholder="بحث..." (input)="search.set(($any($event.target)).value)" />
+    @if (auth.isAdmin()) {
+      <button type="button" class="btn btn-primary" (click)="openCreate()">+ منتج جديد</button>
+    }
+  </div>
+</div>
+
+@if (loading()) {
+  <div class="loading-state">جاري التحميل...</div>
+} @else {
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>المنتج</th>
+          <th>التصنيف</th>
+          <th>SKU / باركود</th>
+          <th>المخزون</th>
+          <th>الأسعار</th>
+          @if (auth.isAdmin()) { <th>إجراءات</th> }
+        </tr>
+      </thead>
+      <tbody>
+        @for (product of filteredProducts(); track product.id) {
+          <tr [class.inactive]="!product.isActive">
+            <td>
+              <strong>{{ product.name }}</strong>
+              @if (!product.isActive) { <span class="badge danger">غير نشط</span> }
+              <small class="muted">{{ product.description }}</small>
+            </td>
+            <td>{{ product.categoryName ?? '—' }}</td>
+            <td>
+              <div>{{ product.sku }}</div>
+              <small class="muted">{{ product.barcode }}</small>
+            </td>
+            <td>
+              <span class="badge" [class.warning]="product.stockQuantity <= product.minQuantity" [class.danger]="product.stockQuantity === 0">
+                {{ product.stockQuantity }} {{ product.baseUnitName }}
+              </span>
+            </td>
+            <td>
+              @for (unit of product.units; track unit.id) {
+                <small class="unit-chip">{{ unit.name }}: {{ formatCurrency(unit.sellingPrice) }}</small>
+              }
+            </td>
+            @if (auth.isAdmin()) {
+              <td class="actions">
+                <button type="button" class="btn btn-secondary btn-sm" (click)="openEdit(product)">تعديل</button>
+                <button type="button" class="btn btn-danger btn-sm" (click)="deleteProduct(product)">حذف</button>
+              </td>
+            }
+          </tr>
+        } @empty {
+          <tr><td [attr.colspan]="auth.isAdmin() ? 6 : 5" class="muted">لا توجد منتجات</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+@if (showModal()) {
+  <div class="modal-backdrop" (click)="showModal.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>{{ editing() ? 'تعديل منتج' : 'منتج جديد' }}</h2>
+      <div class="form-row">
+        <label><span>الاسم</span><input [(ngModel)]="form.name" /></label>
+        <label><span>SKU</span><input [(ngModel)]="form.sku" /></label>
+        <label><span>الباركود</span><input [(ngModel)]="form.barcode" /></label>
+        <label><span>التصنيف</span>
+          <select [(ngModel)]="form.categoryId">
+            <option value="">بدون</option>
+            @for (c of categories(); track c.id) { <option [value]="c.id">{{ c.name }}</option> }
+          </select>
+        </label>
+        <label><span>الحد الأدنى</span><input type="number" [(ngModel)]="form.minQuantity" /></label>
+        @if (!editing()) {
+          <label><span>الكمية الابتدائية</span><input type="number" [(ngModel)]="form.initialQuantity" /></label>
+          <label><span>اسم الوحدة</span><input [(ngModel)]="form.unitName" /></label>
+          <label><span>سعر التكلفة</span><input type="number" [(ngModel)]="form.costPrice" /></label>
+          <label><span>سعر البيع</span><input type="number" [(ngModel)]="form.sellingPrice" /></label>
+        }
+        @if (editing()) {
+          <label><span>نشط</span><select [(ngModel)]="form.isActive"><option [ngValue]="true">نعم</option><option [ngValue]="false">لا</option></select></label>
+        }
+      </div>
+      <label class="full-label"><span>الوصف</span><textarea [(ngModel)]="form.description" rows="2"></textarea></label>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" (click)="showModal.set(false)">إلغاء</button>
+        <button type="button" class="btn btn-primary" (click)="save()">حفظ</button>
+      </div>
+    </div>
+  </div>
+}

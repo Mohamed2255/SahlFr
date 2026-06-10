@@ -1,0 +1,21 @@
+.filter-row {
+  max-width: 600px;
+  margin-bottom: 1.25rem;
+}
+
+.text-success {
+  color: var(--success);
+  font-weight: 700;
+}
+
+.aging-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+@media (max-width: 800px) {
+  .aging-grid {
+    grid-template-columns: 1fr;
+  }
+}

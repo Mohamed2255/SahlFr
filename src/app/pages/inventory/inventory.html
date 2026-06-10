@@ -1,0 +1,107 @@
+<div class="page-header">
+  <div>
+    <h1>إدارة المخزون</h1>
+    <p>مستويات المخزون، التعديلات، وسجل الحركات</p>
+  </div>
+  @if (auth.isAdmin()) {
+    <button type="button" class="btn btn-primary" (click)="openAdjust()">تعديل مخزون</button>
+  }
+</div>
+
+<div class="tabs">
+  <button type="button" [class.active]="tab() === 'stock'" (click)="tab.set('stock')">المخزون الحالي</button>
+  <button type="button" [class.active]="tab() === 'movements'" (click)="tab.set('movements')">سجل الحركات</button>
+  <button type="button" [class.active]="tab() === 'alerts'" (click)="tab.set('alerts')">
+    تنبيهات ({{ lowStock().length }})
+  </button>
+</div>
+
+@if (loading()) {
+  <div class="loading-state">جاري التحميل...</div>
+} @else if (tab() === 'stock') {
+  <div class="table-card">
+    <table>
+      <thead><tr><th>المنتج</th><th>SKU</th><th>الكمية</th><th>الحد الأدنى</th><th>الحالة</th>@if (auth.isAdmin()) {<th></th>}</tr></thead>
+      <tbody>
+        @for (p of products(); track p.id) {
+          <tr>
+            <td><strong>{{ p.name }}</strong></td>
+            <td>{{ p.sku }}</td>
+            <td>{{ p.stockQuantity }} {{ p.baseUnitName }}</td>
+            <td>{{ p.minQuantity }}</td>
+            <td>
+              @if (p.stockQuantity === 0) { <span class="badge danger">نفد</span> }
+              @else if (p.stockQuantity <= p.minQuantity) { <span class="badge warning">منخفض</span> }
+              @else { <span class="badge success">متوفر</span> }
+            </td>
+            @if (auth.isAdmin()) {
+              <td><button type="button" class="btn btn-secondary btn-sm" (click)="openAdjust(p)">تعديل</button></td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+} @else if (tab() === 'movements') {
+  <div class="table-card">
+    <table>
+      <thead><tr><th>التاريخ</th><th>المنتج</th><th>النوع</th><th>السابق</th><th>الجديد</th><th>التغيير</th><th>السبب</th><th>المستخدم</th></tr></thead>
+      <tbody>
+        @for (m of movements(); track m.id) {
+          <tr>
+            <td>{{ formatDate(m.createdDate) }}</td>
+            <td>{{ m.productName }}</td>
+            <td>{{ m.movementType }}</td>
+            <td>{{ m.previousQuantity }}</td>
+            <td>{{ m.newQuantity }}</td>
+            <td [class.text-danger]="m.quantityChanged < 0" [class.text-success]="m.quantityChanged > 0">{{ m.quantityChanged }}</td>
+            <td>{{ m.reason }}</td>
+            <td>{{ m.userName ?? '—' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+} @else {
+  <div class="table-card">
+    <table>
+      <thead><tr><th>المنتج</th><th>SKU</th><th>الحالي</th><th>الحد الأدنى</th></tr></thead>
+      <tbody>
+        @for (p of lowStock(); track p.productId) {
+          <tr>
+            <td>{{ p.name }}</td>
+            <td>{{ p.sku }}</td>
+            <td class="badge warning">{{ p.currentQuantity }} {{ p.baseUnitName }}</td>
+            <td>{{ p.minQuantity }}</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="4" class="muted">لا توجد تنبيهات — المخزون جيد ✓</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+@if (showAdjust()) {
+  <div class="modal-backdrop" (click)="showAdjust.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>تعديل المخزون</h2>
+      <div class="form-row full">
+        <label><span>المنتج</span>
+          <select [(ngModel)]="adjustForm.productId">
+            <option value="">اختر منتجاً</option>
+            @for (p of products(); track p.id) {
+              <option [value]="p.id">{{ p.name }} ({{ p.stockQuantity }})</option>
+            }
+          </select>
+        </label>
+        <label><span>الكمية الجديدة</span><input type="number" [(ngModel)]="adjustForm.newQuantity" /></label>
+        <label><span>السبب</span><input [(ngModel)]="adjustForm.reason" placeholder="سبب التعديل..." /></label>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" (click)="showAdjust.set(false)">إلغاء</button>
+        <button type="button" class="btn btn-primary" (click)="submitAdjust()">حفظ</button>
+      </div>
+    </div>
+  </div>
+}

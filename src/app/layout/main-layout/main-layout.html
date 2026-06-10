@@ -1,0 +1,90 @@
+<div class="layout" [class.sidebar-collapsed]="collapsed()">
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-icon">س</span>
+      @if (!collapsed()) {
+        <div>
+          <strong>سهل ERP</strong>
+          <small>نظام إدارة متكامل</small>
+        </div>
+      }
+    </div>
+
+    <nav class="nav">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        <span class="nav-icon">📊</span>
+        @if (!collapsed()) { <span>لوحة التحكم</span> }
+      </a>
+      <a routerLink="/pos" routerLinkActive="active">
+        <span class="nav-icon">🛒</span>
+        @if (!collapsed()) { <span>نقطة البيع</span> }
+      </a>
+      <a routerLink="/products" routerLinkActive="active">
+        <span class="nav-icon">📦</span>
+        @if (!collapsed()) { <span>المنتجات</span> }
+      </a>
+      <a routerLink="/inventory" routerLinkActive="active">
+        <span class="nav-icon">📋</span>
+        @if (!collapsed()) { <span>المخزون</span> }
+      </a>
+      <a routerLink="/customers" routerLinkActive="active">
+        <span class="nav-icon">👥</span>
+        @if (!collapsed()) { <span>العملاء</span> }
+      </a>
+      @if (auth.isAdmin()) {
+        <a routerLink="/purchases" routerLinkActive="active">
+          <span class="nav-icon">🚚</span>
+          @if (!collapsed()) { <span>المشتريات</span> }
+        </a>
+        <a routerLink="/vendors" routerLinkActive="active">
+          <span class="nav-icon">🏭</span>
+          @if (!collapsed()) { <span>الموردون</span> }
+        </a>
+        <a routerLink="/categories" routerLinkActive="active">
+          <span class="nav-icon">🏷️</span>
+          @if (!collapsed()) { <span>التصنيفات</span> }
+        </a>
+        <a routerLink="/units" routerLinkActive="active">
+          <span class="nav-icon">⚖️</span>
+          @if (!collapsed()) { <span>الوحدات</span> }
+        </a>
+        <a routerLink="/reports" routerLinkActive="active">
+          <span class="nav-icon">📈</span>
+          @if (!collapsed()) { <span>التقارير</span> }
+        </a>
+        <a routerLink="/users" routerLinkActive="active">
+          <span class="nav-icon">👤</span>
+          @if (!collapsed()) { <span>المستخدمون</span> }
+        </a>
+      }
+    </nav>
+
+    <div class="sidebar-footer">
+      <button type="button" class="btn btn-ghost btn-sm theme-btn" (click)="theme.toggle()">
+        {{ theme.isDark() ? '☀️' : '🌙' }}
+        @if (!collapsed()) { <span>{{ theme.isDark() ? 'وضع فاتح' : 'وضع داكن' }}</span> }
+      </button>
+      <div class="user-panel">
+        @if (!collapsed()) {
+          <div class="user-info">
+            <span class="user-name">{{ auth.currentUser()?.fullName }}</span>
+            <span class="user-role">{{ auth.isAdmin() ? 'مدير النظام' : 'أمين الصندوق' }}</span>
+          </div>
+        }
+        <button type="button" class="btn btn-ghost btn-sm" (click)="logout()">
+          @if (collapsed()) { 🚪 } @else { تسجيل الخروج }
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-area">
+    <header class="topbar">
+      <button type="button" class="btn btn-ghost btn-sm" (click)="toggleSidebar()">☰</button>
+      <div class="topbar-title">سهل ERP</div>
+    </header>
+    <main class="content">
+      <router-outlet />
+    </main>
+  </div>
+</div>

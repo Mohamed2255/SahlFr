@@ -1,0 +1,140 @@
+.invoice {
+  background: #fff;
+  color: #0f172a;
+  padding: 1.5rem;
+  border-radius: 12px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.invoice-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.brand-block {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  h1 {
+    margin: 0;
+    font-size: 1.25rem;
+  }
+
+  small {
+    color: #64748b;
+  }
+}
+
+.logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #4f46e5;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+}
+
+.invoice-meta {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+
+  strong {
+    font-size: 1.1rem;
+  }
+
+  span {
+    color: #64748b;
+    font-size: 0.85rem;
+  }
+}
+
+.invoice-parties {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+
+  small {
+    display: block;
+    color: #64748b;
+    font-size: 0.75rem;
+  }
+
+  strong {
+    display: block;
+  }
+}
+
+table {
+  width: 100%;
+  margin-bottom: 1rem;
+
+  th, td {
+    padding: 0.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: right;
+    font-size: 0.9rem;
+  }
+
+  th {
+    background: #f8fafc;
+    font-weight: 700;
+  }
+}
+
+.invoice-totals {
+  margin-right: auto;
+  max-width: 280px;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.35rem 0;
+  font-size: 0.9rem;
+
+  &.grand {
+    font-size: 1.1rem;
+    border-top: 2px solid #0f172a;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+  }
+
+  &.due strong {
+    color: #dc2626;
+  }
+}
+
+.notes {
+  margin-top: 1rem;
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.print-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .invoice {
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0;
+  }
+}

@@ -1,0 +1,69 @@
+<div class="page-header">
+  <div><h1>الموردون</h1><p>إدارة الموردين والمستحقات</p></div>
+  <button type="button" class="btn btn-primary" (click)="openCreate()">+ مورد جديد</button>
+</div>
+
+<div class="grid-2">
+  <div class="table-card">
+    <table>
+      <thead><tr><th>الاسم</th><th>الجوال</th><th>المستحق</th><th>إجراءات</th></tr></thead>
+      <tbody>
+        @for (v of vendors(); track v.id) {
+          <tr>
+            <td><strong>{{ v.name }}</strong></td>
+            <td>{{ v.mobile }}</td>
+            <td><span class="badge" [class.danger]="v.balance > 0">{{ formatCurrency(v.balance) }}</span></td>
+            <td class="actions">
+              <button type="button" class="btn btn-secondary btn-sm" (click)="viewLedger(v)">كشف</button>
+              <button type="button" class="btn btn-secondary btn-sm" (click)="openEdit(v)">تعديل</button>
+              @if (v.balance > 0) {
+                <button type="button" class="btn btn-primary btn-sm" (click)="openPayment(v)">دفعة</button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  @if (selected()) {
+    <div class="panel">
+      <h2>كشف: {{ selected()!.name }}</h2>
+      @for (e of ledger(); track e.id) {
+        <div class="detail-row">
+          <div><strong>{{ e.description }}</strong><small class="muted">{{ formatDate(e.createdDate) }}</small></div>
+          <span>{{ formatCurrency(e.amount) }}</span>
+        </div>
+      } @empty { <p class="muted">لا توجد معاملات</p> }
+    </div>
+  }
+</div>
+
+@if (showForm()) {
+  <div class="modal-backdrop" (click)="showForm.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>{{ form.id ? 'تعديل مورد' : 'مورد جديد' }}</h2>
+      <div class="form-row">
+        <label><span>الاسم</span><input [(ngModel)]="form.name" /></label>
+        <label><span>الجوال</span><input [(ngModel)]="form.mobile" /></label>
+        <label><span>البريد</span><input [(ngModel)]="form.email" /></label>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" (click)="showForm.set(false)">إلغاء</button>
+        <button type="button" class="btn btn-primary" (click)="save()">حفظ</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showPayment()) {
+  <div class="modal-backdrop" (click)="showPayment.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>دفعة للمورد — {{ selected()?.name }}</h2>
+      <label class="full-label"><span>المبلغ</span><input type="number" [(ngModel)]="paymentAmount" /></label>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" (click)="showPayment.set(false)">إلغاء</button>
+        <button type="button" class="btn btn-primary" (click)="submitPayment()">تسجيل</button>
+      </div>
+    </div>
+  </div>
+}

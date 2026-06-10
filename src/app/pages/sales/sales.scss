@@ -1,0 +1,11 @@
+.sales-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 1rem;
+}
+
+@media (max-width: 1100px) {
+  .sales-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,83 @@
+@if (invoice(); as inv) {
+  <div class="invoice" id="invoice-print">
+    <header class="invoice-header">
+      <div class="brand-block">
+        <span class="logo">س</span>
+        <div>
+          <h1>سهل ERP</h1>
+          <small>فاتورة مبيعات</small>
+        </div>
+      </div>
+      <div class="invoice-meta">
+        <strong>{{ inv.saleNumber }}</strong>
+        <span>{{ formatDate(inv.saleDate) }}</span>
+      </div>
+    </header>
+
+    <section class="invoice-parties">
+      <div>
+        <small>الكاشير</small>
+        <strong>{{ inv.cashierName }}</strong>
+      </div>
+      @if (inv.customerName) {
+        <div>
+          <small>العميل</small>
+          <strong>{{ inv.customerName }}</strong>
+          @if (inv.customerMobile) { <span>{{ inv.customerMobile }}</span> }
+        </div>
+      }
+      <div>
+        <small>طريقة الدفع</small>
+        <strong>{{ inv.paymentMethod }}</strong>
+      </div>
+    </section>
+
+    <table>
+      <thead>
+        <tr>
+          <th>المنتج</th>
+          <th>الوحدة</th>
+          <th>الكمية</th>
+          <th>السعر</th>
+          <th>الخصم</th>
+          <th>الإجمالي</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of inv.items; track $index) {
+          <tr>
+            <td>{{ item.productName }}</td>
+            <td>{{ item.unitName }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ formatCurrency(item.unitPrice) }}</td>
+            <td>{{ formatCurrency(item.discountAmount) }}</td>
+            <td>{{ formatCurrency(item.subTotal) }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <footer class="invoice-totals">
+      <div class="total-row"><span>المجموع الفرعي</span><span>{{ formatCurrency(inv.subTotal) }}</span></div>
+      @if (inv.discountAmount > 0) {
+        <div class="total-row"><span>الخصم</span><span>-{{ formatCurrency(inv.discountAmount) }}</span></div>
+      }
+      @if (inv.taxAmount > 0) {
+        <div class="total-row"><span>الضريبة</span><span>{{ formatCurrency(inv.taxAmount) }}</span></div>
+      }
+      <div class="total-row grand"><span>الإجمالي</span><strong>{{ formatCurrency(inv.totalAmount) }}</strong></div>
+      <div class="total-row"><span>المدفوع</span><span>{{ formatCurrency(inv.paidAmount) }}</span></div>
+      @if (inv.dueAmount > 0) {
+        <div class="total-row due"><span>المتبقي</span><strong>{{ formatCurrency(inv.dueAmount) }}</strong></div>
+      }
+    </footer>
+
+    @if (inv.notes) {
+      <p class="notes"><small>ملاحظات:</small> {{ inv.notes }}</p>
+    }
+  </div>
+
+  <div class="print-actions no-print">
+    <button type="button" class="btn btn-primary" (click)="print()">🖨️ طباعة</button>
+  </div>
+}

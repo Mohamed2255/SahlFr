@@ -1,0 +1,74 @@
+<div class="page-header">
+  <div>
+    <h1>إدارة المستخدمين</h1>
+    <p>إضافة وتعديل حسابات الموظفين والصلاحيات</p>
+  </div>
+  <button type="button" class="btn btn-primary" (click)="openCreate()">+ مستخدم جديد</button>
+</div>
+
+<div class="table-card">
+  <table>
+    <thead>
+      <tr>
+        <th>الاسم</th>
+        <th>اسم المستخدم</th>
+        <th>الدور</th>
+        <th>الحالة</th>
+        <th>تاريخ الإنشاء</th>
+        <th>إجراءات</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (user of users(); track user.id) {
+        <tr>
+          <td><strong>{{ user.fullName }}</strong></td>
+          <td>{{ user.username }}</td>
+          <td>{{ roleLabel(user.role) }}</td>
+          <td>
+            <span class="badge" [class.success]="user.isActive" [class.danger]="!user.isActive">
+              {{ user.isActive ? 'نشط' : 'معطل' }}
+            </span>
+          </td>
+          <td>{{ formatDate(user.createdDate) }}</td>
+          <td class="actions">
+            <button type="button" class="btn btn-secondary btn-sm" (click)="openEdit(user)">تعديل</button>
+            <button type="button" class="btn btn-danger btn-sm" (click)="deleteUser(user)">حذف</button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+@if (showForm()) {
+  <div class="modal-backdrop" (click)="showForm.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>{{ form.id ? 'تعديل مستخدم' : 'مستخدم جديد' }}</h2>
+      <div class="form-row">
+        <label><span>الاسم الكامل</span><input [(ngModel)]="form.fullName" /></label>
+        <label><span>اسم المستخدم</span><input [(ngModel)]="form.username" [disabled]="!!form.id" /></label>
+        <label>
+          <span>{{ form.id ? 'كلمة مرور جديدة (اختياري)' : 'كلمة المرور' }}</span>
+          <input type="password" [(ngModel)]="form.password" />
+        </label>
+        <label><span>الدور</span>
+          <select [(ngModel)]="form.role">
+            @for (r of roles; track r.value) {
+              <option [value]="r.value">{{ r.label }}</option>
+            }
+          </select>
+        </label>
+        <label><span>الحالة</span>
+          <select [(ngModel)]="form.isActive">
+            <option [ngValue]="true">نشط</option>
+            <option [ngValue]="false">معطل</option>
+          </select>
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" (click)="showForm.set(false)">إلغاء</button>
+        <button type="button" class="btn btn-primary" (click)="save()">حفظ</button>
+      </div>
+    </div>
+  </div>
+}

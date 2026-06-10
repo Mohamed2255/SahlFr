@@ -1,0 +1,35 @@
+<div class="login-page">
+  <div class="login-card">
+    <div class="login-header">
+      <span class="logo">س</span>
+      <h1>سهل ERP</h1>
+      <p>نظام إدارة متكامل للمبيعات والمخزون</p>
+    </div>
+
+    @if (error()) {
+      <div class="alert alert-error">{{ error() }}</div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <label>
+        <span>اسم المستخدم</span>
+        <input type="text" formControlName="username" autocomplete="username" />
+      </label>
+
+      <label>
+        <span>كلمة المرور</span>
+        <input type="password" formControlName="password" autocomplete="current-password" />
+      </label>
+
+      <button type="submit" class="btn btn-primary" [disabled]="loading()">
+        {{ loading() ? 'جاري الدخول...' : 'دخول' }}
+      </button>
+    </form>
+
+    <div class="demo-credentials">
+      <p>حسابات تجريبية:</p>
+      <code>admin / AdminPassword123!</code>
+      <code>cashier / CashierPassword123!</code>
+    </div>
+  </div>
+</div>

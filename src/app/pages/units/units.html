@@ -1,0 +1,42 @@
+<div class="page-header">
+  <div><h1>وحدات القياس</h1><p>إدارة وحدات المنتجات</p></div>
+  <button type="button" class="btn btn-primary" (click)="openCreate()">+ وحدة مخصصة</button>
+</div>
+
+<div class="table-card">
+  <table>
+    <thead><tr><th>الاسم</th><th>الرمز</th><th>النوع</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+    <tbody>
+      @for (u of units(); track u.id) {
+        <tr>
+          <td><strong>{{ u.name }}</strong></td>
+          <td>{{ u.symbol }}</td>
+          <td>{{ u.isSystem ? 'نظام' : 'مخصص' }}</td>
+          <td><span class="badge success">{{ u.isActive ? 'نشط' : 'غير نشط' }}</span></td>
+          <td class="actions">
+            @if (!u.isSystem) {
+              <button type="button" class="btn btn-secondary btn-sm" (click)="openEdit(u)">تعديل</button>
+              <button type="button" class="btn btn-danger btn-sm" (click)="delete(u)">حذف</button>
+            }
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+@if (showForm()) {
+  <div class="modal-backdrop" (click)="showForm.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>{{ form.id ? 'تعديل وحدة' : 'وحدة جديدة' }}</h2>
+      <div class="form-row">
+        <label><span>الاسم</span><input [(ngModel)]="form.name" /></label>
+        <label><span>الرمز</span><input [(ngModel)]="form.symbol" /></label>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" (click)="showForm.set(false)">إلغاء</button>
+        <button type="button" class="btn btn-primary" (click)="save()">حفظ</button>
+      </div>
+    </div>
+  </div>
+}

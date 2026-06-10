@@ -1,0 +1,127 @@
+<div class="page-header">
+  <div>
+    <h1>المبيعات</h1>
+    <p>إنشاء فاتورة بيع ومتابعة العمليات السابقة</p>
+  </div>
+</div>
+
+<div class="sales-grid">
+  <section class="panel">
+    <h2>فاتورة بيع جديدة</h2>
+
+    @if (error()) {
+      <div class="alert alert-error">{{ error() }}</div>
+    }
+    @if (success()) {
+      <div class="alert alert-success">{{ success() }}</div>
+    }
+
+    <div class="form-row">
+      <label>
+        <span>المنتج</span>
+        <select [(ngModel)]="selectedProductId" (ngModelChange)="onProductChange()">
+          <option value="">اختر منتجاً</option>
+          @for (product of products(); track product.id) {
+            <option [value]="product.id">{{ product.name }} ({{ product.stockQuantity }} {{ product.baseUnitName }})</option>
+          }
+        </select>
+      </label>
+
+      <label>
+        <span>الوحدة</span>
+        <select [(ngModel)]="selectedUnitId" (ngModelChange)="onUnitChange()" [disabled]="!selectedProductId">
+          @for (unit of availableUnits(); track unit.id) {
+            <option [value]="unit.id">{{ unit.name }}</option>
+          }
+        </select>
+      </label>
+
+      <label>
+        <span>الكمية</span>
+        <input type="number" min="0.01" step="0.01" [(ngModel)]="quantity" />
+      </label>
+
+      <label>
+        <span>سعر الوحدة</span>
+        <input type="number" min="0" step="0.01" [(ngModel)]="unitPrice" />
+      </label>
+    </div>
+
+    <button type="button" class="btn btn-secondary" (click)="addToCart()">إضافة للفاتورة</button>
+
+    <div class="cart">
+      <h3>عناصر الفاتورة</h3>
+      @if (!cart().length) {
+        <p class="muted">لا توجد عناصر بعد</p>
+      } @else {
+        <table>
+          <thead>
+            <tr>
+              <th>المنتج</th>
+              <th>الوحدة</th>
+              <th>الكمية</th>
+              <th>السعر</th>
+              <th>الإجمالي</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (line of cart(); track $index) {
+              <tr>
+                <td>{{ line.product.name }}</td>
+                <td>{{ line.unit.name }}</td>
+                <td>{{ line.quantity }}</td>
+                <td>{{ formatCurrency(line.unitPrice) }}</td>
+                <td>{{ formatCurrency(line.quantity * line.unitPrice) }}</td>
+                <td>
+                  <button type="button" class="btn btn-ghost btn-sm" (click)="removeFromCart($index)">حذف</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+
+      <div class="cart-footer">
+        <strong>الإجمالي: {{ formatCurrency(cartTotal()) }}</strong>
+        <button type="button" class="btn btn-primary" [disabled]="submitting() || !cart().length" (click)="submitSale()">
+          {{ submitting() ? 'جاري الحفظ...' : 'تأكيد البيع' }}
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>سجل المبيعات</h2>
+    @if (loading()) {
+      <div class="loading-state">جاري التحميل...</div>
+    } @else {
+      <div class="history-list">
+        @for (sale of sales(); track sale.id) {
+          <article class="history-item">
+            <button type="button" class="history-header" (click)="toggleSaleDetails(sale.id)">
+              <div>
+                <strong>{{ sale.saleNumber }}</strong>
+                <small>{{ formatDate(sale.saleDate) }} — {{ sale.cashierName }}</small>
+              </div>
+              <span>{{ formatCurrency(sale.totalAmount) }}</span>
+            </button>
+
+            @if (expandedSaleId() === sale.id) {
+              <div class="history-details">
+                @for (item of sale.items; track item.id) {
+                  <div class="detail-row">
+                    <span>{{ item.productName }} ({{ item.unitName }}) × {{ item.quantity }}</span>
+                    <span>{{ formatCurrency(item.subTotal) }}</span>
+                  </div>
+                }
+              </div>
+            }
+          </article>
+        } @empty {
+          <p class="muted">لا توجد مبيعات مسجلة</p>
+        }
+      </div>
+    }
+  </section>
+</div>

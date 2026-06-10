@@ -1,0 +1,79 @@
+<div class="page-header">
+  <div><h1>العملاء</h1><p>إدارة حسابات العملاء والأرصدة</p></div>
+  @if (auth.isAdmin()) { <button type="button" class="btn btn-primary" (click)="openCreate()">+ عميل جديد</button> }
+</div>
+
+<div class="grid-2">
+  <div class="table-card">
+    <table>
+      <thead><tr><th>الاسم</th><th>الجوال</th><th>الرصيد</th><th>حد الائتمان</th><th>إجراءات</th></tr></thead>
+      <tbody>
+        @for (c of customers(); track c.id) {
+          <tr>
+            <td><strong>{{ c.name }}</strong></td>
+            <td>{{ c.mobile }}</td>
+            <td><span class="badge" [class.danger]="c.balance > 0">{{ formatCurrency(c.balance) }}</span></td>
+            <td>{{ formatCurrency(c.creditLimit) }}</td>
+            <td class="actions">
+              <button type="button" class="btn btn-secondary btn-sm" (click)="viewLedger(c)">كشف</button>
+              @if (auth.isAdmin()) {
+                <button type="button" class="btn btn-secondary btn-sm" (click)="openEdit(c)">تعديل</button>
+                @if (c.balance > 0) {
+                  <button type="button" class="btn btn-primary btn-sm" (click)="openPayment(c)">دفعة</button>
+                }
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (selected()) {
+    <div class="panel">
+      <h2>كشف حساب: {{ selected()!.name }}</h2>
+      @for (entry of ledger(); track entry.id) {
+        <div class="detail-row">
+          <div>
+            <strong>{{ entry.description }}</strong>
+            <small class="muted">{{ formatDate(entry.createdDate) }} — {{ entry.entryType }}</small>
+          </div>
+          <span [class.text-danger]="entry.amount > 0">{{ formatCurrency(entry.amount) }}</span>
+        </div>
+      } @empty { <p class="muted">لا توجد معاملات</p> }
+    </div>
+  }
+</div>
+
+@if (showForm()) {
+  <div class="modal-backdrop" (click)="showForm.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>{{ form.id ? 'تعديل عميل' : 'عميل جديد' }}</h2>
+      <div class="form-row">
+        <label><span>الاسم</span><input [(ngModel)]="form.name" /></label>
+        <label><span>الجوال</span><input [(ngModel)]="form.mobile" /></label>
+        <label><span>البريد</span><input [(ngModel)]="form.email" /></label>
+        <label><span>حد الائتمان</span><input type="number" [(ngModel)]="form.creditLimit" /></label>
+      </div>
+      <label class="full-label"><span>العنوان</span><input [(ngModel)]="form.address" /></label>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" (click)="showForm.set(false)">إلغاء</button>
+        <button type="button" class="btn btn-primary" (click)="save()">حفظ</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showPayment()) {
+  <div class="modal-backdrop" (click)="showPayment.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>تسجيل دفعة — {{ selected()?.name }}</h2>
+      <p>الرصيد الحالي: <strong class="badge danger">{{ formatCurrency(selected()?.balance ?? 0) }}</strong></p>
+      <label class="full-label"><span>مبلغ الدفعة</span><input type="number" [(ngModel)]="paymentAmount" /></label>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" (click)="showPayment.set(false)">إلغاء</button>
+        <button type="button" class="btn btn-primary" (click)="submitPayment()">تسجيل</button>
+      </div>
+    </div>
+  </div>
+}

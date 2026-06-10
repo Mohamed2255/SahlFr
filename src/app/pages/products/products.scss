@@ -1,0 +1,43 @@
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.unit-chip {
+  display: block;
+  margin-bottom: 0.15rem;
+}
+
+.actions {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.inactive {
+  opacity: 0.6;
+}
+
+.full-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+
+  span {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  textarea {
+    resize: vertical;
+  }
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}

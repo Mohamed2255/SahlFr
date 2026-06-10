@@ -1,0 +1,102 @@
+<div class="page-header">
+  <div><h1>التقارير والتحليلات</h1><p>تقارير مالية ومخزون وحسابات</p></div>
+  @if (tab() !== 'aging') {
+    <button type="button" class="btn btn-secondary" (click)="exportCurrent()">⬇️ تصدير CSV</button>
+  }
+</div>
+
+<div class="tabs">
+  <button type="button" [class.active]="tab() === 'profit'" (click)="tab.set('profit'); loadTab()">الأرباح</button>
+  <button type="button" [class.active]="tab() === 'sales'" (click)="tab.set('sales'); loadTab()">المبيعات</button>
+  <button type="button" [class.active]="tab() === 'inventory'" (click)="tab.set('inventory'); loadTab()">تقييم المخزون</button>
+  <button type="button" [class.active]="tab() === 'aging'" (click)="tab.set('aging'); loadTab()">أعمار الديون</button>
+</div>
+
+@if (tab() !== 'inventory' && tab() !== 'aging') {
+  <div class="form-row filter-row">
+    <label><span>من</span><input type="date" [(ngModel)]="startDate" /></label>
+    <label><span>إلى</span><input type="date" [(ngModel)]="endDate" /></label>
+    @if (tab() === 'sales') {
+      <label><span>الفترة</span>
+        <select [(ngModel)]="salesPeriod">
+          <option value="daily">يومي</option>
+          <option value="weekly">أسبوعي</option>
+          <option value="monthly">شهري</option>
+          <option value="yearly">سنوي</option>
+        </select>
+      </label>
+    }
+    <button type="button" class="btn btn-primary" (click)="loadTab()">تحديث</button>
+  </div>
+}
+
+@if (error()) { <div class="alert alert-error">{{ error() }}</div> }
+@if (loading()) { <div class="loading-state">جاري التحميل...</div> }
+
+@if (!loading() && tab() === 'profit' && profitReport(); as r) {
+  <div class="stats-grid">
+    <div class="stat-card accent"><span class="stat-label">الإيرادات</span><span class="stat-value">{{ formatCurrency(r.totalRevenue) }}</span></div>
+    <div class="stat-card"><span class="stat-label">التكلفة</span><span class="stat-value">{{ formatCurrency(r.totalCost) }}</span></div>
+    <div class="stat-card success"><span class="stat-label">صافي الربح</span><span class="stat-value">{{ formatCurrency(r.netProfit) }}</span></div>
+  </div>
+  <div class="table-card">
+    <table>
+      <thead><tr><th>الفاتورة</th><th>التاريخ</th><th>الكاشير</th><th>الإيراد</th><th>التكلفة</th><th>الربح</th></tr></thead>
+      <tbody>
+        @for (s of r.sales; track s.saleId) {
+          <tr>
+            <td>{{ s.saleNumber }}</td>
+            <td>{{ formatDate(s.saleDate) }}</td>
+            <td>{{ s.cashierName }}</td>
+            <td>{{ formatCurrency(s.totalRevenue) }}</td>
+            <td>{{ formatCurrency(s.totalCost) }}</td>
+            <td class="text-success">{{ formatCurrency(s.netProfit) }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+@if (!loading() && tab() === 'sales') {
+  <div class="table-card">
+    <table>
+      <thead><tr><th>الفترة</th><th>عدد الفواتير</th><th>إجمالي المبيعات</th></tr></thead>
+      <tbody>
+        @for (s of salesReport(); track s.period) {
+          <tr><td>{{ s.period }}</td><td>{{ s.invoiceCount }}</td><td>{{ formatCurrency(s.totalSales) }}</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+@if (!loading() && tab() === 'inventory') {
+  <div class="table-card">
+    <table>
+      <thead><tr><th>المنتج</th><th>الكمية</th><th>تكلفة الوحدة</th><th>القيمة الإجمالية</th></tr></thead>
+      <tbody>
+        @for (i of inventoryReport(); track i.productId) {
+          <tr><td>{{ i.name }}</td><td>{{ i.quantity }}</td><td>{{ formatCurrency(i.unitCost) }}</td><td>{{ formatCurrency(i.totalValue) }}</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+@if (!loading() && tab() === 'aging') {
+  <div class="aging-grid">
+    <div class="panel">
+      <h2>ديون العملاء</h2>
+      @for (c of customerAging(); track c.id) {
+        <div class="detail-row"><span>{{ c.name }}</span><span class="badge danger">{{ formatCurrency(c.balance) }} — {{ c.daysOutstanding }} يوم</span></div>
+      } @empty { <p class="muted">لا توجد ديون</p> }
+    </div>
+    <div class="panel">
+      <h2>مستحقات الموردين</h2>
+      @for (v of vendorAging(); track v.id) {
+        <div class="detail-row"><span>{{ v.name }}</span><span class="badge warning">{{ formatCurrency(v.balance) }} — {{ v.daysOutstanding }} يوم</span></div>
+      } @empty { <p class="muted">لا توجد مستحقات</p> }
+    </div>
+  </div>
+}

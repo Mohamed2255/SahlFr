@@ -1,0 +1,48 @@
+<div class="page-header">
+  <div><h1>التصنيفات</h1><p>إدارة التصنيفات والتصنيفات الفرعية</p></div>
+  <button type="button" class="btn btn-primary" (click)="openCreate()">+ تصنيف</button>
+</div>
+
+<div class="table-card">
+  <table>
+    <thead><tr><th>الاسم</th><th>التصنيف الأب</th><th>المنتجات</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+    <tbody>
+      @for (c of categories(); track c.id) {
+        <tr>
+          <td><strong>{{ c.name }}</strong><small class="muted">{{ c.description }}</small></td>
+          <td>{{ c.parentCategoryName ?? '—' }}</td>
+          <td>{{ c.productCount }}</td>
+          <td><span class="badge" [class.success]="c.isActive">{{ c.isActive ? 'نشط' : 'غير نشط' }}</span></td>
+          <td class="actions">
+            <button type="button" class="btn btn-secondary btn-sm" (click)="openEdit(c)">تعديل</button>
+            <button type="button" class="btn btn-danger btn-sm" (click)="delete(c)">حذف</button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+@if (showForm()) {
+  <div class="modal-backdrop" (click)="showForm.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>{{ form.id ? 'تعديل' : 'تصنيف جديد' }}</h2>
+      <div class="form-row">
+        <label><span>الاسم</span><input [(ngModel)]="form.name" /></label>
+        <label><span>التصنيف الأب</span>
+          <select [(ngModel)]="form.parentCategoryId">
+            <option value="">بدون</option>
+            @for (c of categories(); track c.id) {
+              @if (c.id !== form.id) { <option [value]="c.id">{{ c.name }}</option> }
+            }
+          </select>
+        </label>
+      </div>
+      <label class="full-label"><span>الوصف</span><input [(ngModel)]="form.description" /></label>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" (click)="showForm.set(false)">إلغاء</button>
+        <button type="button" class="btn btn-primary" (click)="save()">حفظ</button>
+      </div>
+    </div>
+  </div>
+}
