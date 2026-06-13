@@ -490,3 +490,10 @@ table {
     grid-template-columns: 1fr;
   }
 }
+
+.qty-input {
+  width: 4.5rem;
+  min-width: 4rem;
+  padding: 0.35rem 0.5rem;
+  text-align: center;
+}

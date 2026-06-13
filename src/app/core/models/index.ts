@@ -27,6 +27,10 @@ export interface SaleInvoice {
   cashierName: string;
   customerName?: string;
   customerMobile?: string;
+  previousBalance?: number;
+  paymentsApplied?: number;
+  newBalance?: number;
+  currentAccountBalance?: number;
   items: {
     productName: string;
     unitName: string;
@@ -170,6 +174,21 @@ export interface CreatePurchaseRequest {
   paymentMethod?: number;
   notes?: string;
   items: TransactionItem[];
+  expenses?: { description: string; amount: number }[];
+}
+
+export interface UpdateSaleRequest extends CreateSaleRequest {
+  reason: string;
+}
+
+export interface UpdatePurchaseRequest extends CreatePurchaseRequest {
+  reason: string;
+}
+
+export interface PurchaseExpenseLine {
+  id?: string;
+  description: string;
+  amount: number;
 }
 
 export interface SaleLineItem {
@@ -225,6 +244,8 @@ export interface Purchase {
   vendorName?: string;
   itemsCount: number;
   items: PurchaseLineItem[];
+  expenses?: PurchaseExpenseLine[];
+  expensesTotal?: number;
 }
 
 export interface DashboardData {
@@ -318,6 +339,70 @@ export interface CartLine {
   discountAmount?: number;
 }
 
+export interface VoucherAllocation {
+  saleId?: string;
+  purchaseId?: string;
+  amount: number;
+}
+
+export interface ReceiptVoucher {
+  id: string;
+  voucherNumber: string;
+  voucherDate: string;
+  customerId: string;
+  customerName: string;
+  amount: number;
+  paymentMethod: string;
+  chequeNumber?: string;
+  bankReference?: string;
+  notes: string;
+  status: string;
+  createdByName: string;
+  allocations: VoucherAllocation[];
+}
+
+export interface PaymentVoucher {
+  id: string;
+  voucherNumber: string;
+  voucherDate: string;
+  vendorId: string;
+  vendorName: string;
+  amount: number;
+  paymentMethod: string;
+  chequeNumber?: string;
+  bankReference?: string;
+  notes: string;
+  status: string;
+  createdByName: string;
+  allocations: { purchaseId?: string; amount: number }[];
+}
+
+export interface UpsertReceiptVoucherRequest {
+  id?: string;
+  customerId: string;
+  voucherDate?: string;
+  amount: number;
+  paymentMethod: number;
+  chequeNumber?: string;
+  bankReference?: string;
+  notes?: string;
+  allocations?: { saleId?: string; amount: number }[];
+  postImmediately?: boolean;
+}
+
+export interface UpsertPaymentVoucherRequest {
+  id?: string;
+  vendorId: string;
+  voucherDate?: string;
+  amount: number;
+  paymentMethod: number;
+  chequeNumber?: string;
+  bankReference?: string;
+  notes?: string;
+  allocations?: { purchaseId?: string; amount: number }[];
+  postImmediately?: boolean;
+}
+
 export interface ApiError {
   message?: string;
   Message?: string;
@@ -328,5 +413,7 @@ export const PaymentMethods = [
   { value: 1, label: 'بطاقة' },
   { value: 2, label: 'تحويل بنكي' },
   { value: 3, label: 'آجل' },
-  { value: 4, label: 'مختلط' }
+  { value: 4, label: 'مختلط' },
+  { value: 5, label: 'شيك' },
+  { value: 6, label: 'أخرى' }
 ];

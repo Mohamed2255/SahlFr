@@ -115,6 +115,22 @@ table {
   }
 }
 
+.account-summary {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed #cbd5e1;
+
+  h3 {
+    margin: 0 0 0.5rem;
+    font-size: 0.95rem;
+  }
+
+  .muted-row {
+    color: #64748b;
+    font-size: 0.85rem;
+  }
+}
+
 .notes {
   margin-top: 1rem;
   color: #64748b;

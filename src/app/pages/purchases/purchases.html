@@ -38,7 +38,7 @@
 
       <label>
         <span>الكمية</span>
-        <input type="number" min="0.01" step="0.01" [(ngModel)]="quantity" />
+        <input type="number" min="0.01" step="0.01" [(ngModel)]="quantity" class="qty-input" #qtyField (keydown.enter)="addToCart(); qtyField.select()" />
       </label>
 
       <label>
@@ -66,15 +66,25 @@
             </tr>
           </thead>
           <tbody>
-            @for (line of cart(); track $index) {
+            @for (line of cart(); track $index; let i = $index) {
               <tr>
                 <td>{{ line.product.name }}</td>
                 <td>{{ line.unit.name }}</td>
-                <td>{{ line.quantity }}</td>
+                <td>
+                  <input
+                    type="number"
+                    class="qty-input"
+                    [ngModel]="line.quantity"
+                    (ngModelChange)="updateCartQuantity(i, $event)"
+                    (keydown)="onCartQtyKeydown($event, i)"
+                    min="0.01"
+                    step="0.01"
+                  />
+                </td>
                 <td>{{ formatCurrency(line.unitPrice) }}</td>
                 <td>{{ formatCurrency(line.quantity * line.unitPrice) }}</td>
                 <td>
-                  <button type="button" class="btn btn-ghost btn-sm" (click)="removeFromCart($index)">حذف</button>
+                  <button type="button" class="btn btn-ghost btn-sm" (click)="removeFromCart(i)">حذف</button>
                 </td>
               </tr>
             }
@@ -97,11 +107,45 @@
         <label><span>المبلغ المدفوع</span><input type="number" [(ngModel)]="paidAmount" min="0" /></label>
       </div>
 
+      <div class="expenses-section">
+        <h3>مصاريف إضافية</h3>
+        <div class="form-row">
+          <label><span>الوصف</span><input [(ngModel)]="expenseDescription" placeholder="شحن، جمارك..." /></label>
+          <label><span>المبلغ</span><input type="number" min="0" step="0.01" [(ngModel)]="expenseAmount" /></label>
+          <button type="button" class="btn btn-secondary btn-sm" (click)="addExpense()">إضافة</button>
+        </div>
+        @if (expenses.length) {
+          <table>
+            <tbody>
+              @for (exp of expenses; track $index; let ei = $index) {
+                <tr>
+                  <td>{{ exp.description }}</td>
+                  <td>{{ formatCurrency(exp.amount) }}</td>
+                  <td><button type="button" class="btn btn-ghost btn-sm" (click)="removeExpense(ei)">×</button></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <p><strong>إجمالي المصاريف: {{ formatCurrency(expensesTotal()) }}</strong></p>
+        }
+      </div>
+
+      @if (editingPurchaseId()) {
+        <label class="full-label"><span>سبب التعديل</span><input [(ngModel)]="editReason" required /></label>
+      }
+
       <div class="cart-footer">
-        <strong>الإجمالي: {{ formatCurrency(cartTotal()) }}</strong>
-        <button type="button" class="btn btn-primary" [disabled]="submitting() || !cart().length" (click)="submitPurchase()">
-          {{ submitting() ? 'جاري الحفظ...' : 'تأكيد الشراء' }}
-        </button>
+        <strong>الإجمالي: {{ formatCurrency(cartTotal() + expensesTotal()) }}</strong>
+        @if (editingPurchaseId()) {
+          <button type="button" class="btn btn-primary" [disabled]="submitting() || !cart().length" (click)="submitPurchaseUpdate()">
+            {{ submitting() ? 'جاري الحفظ...' : 'حفظ التعديل' }}
+          </button>
+          <button type="button" class="btn btn-ghost" (click)="editingPurchaseId.set(null); cart.set([]); expenses = []">إلغاء</button>
+        } @else {
+          <button type="button" class="btn btn-primary" [disabled]="submitting() || !cart().length" (click)="submitPurchase()">
+            {{ submitting() ? 'جاري الحفظ...' : 'تأكيد الشراء' }}
+          </button>
+        }
       </div>
     </div>
   </section>
@@ -130,6 +174,13 @@
                     <span>{{ formatCurrency(item.subTotal) }}</span>
                   </div>
                 }
+                @if (purchase.expenses?.length) {
+                  <div class="detail-row muted"><span>مصاريف إضافية</span><span>{{ formatCurrency(purchase.expensesTotal ?? 0) }}</span></div>
+                  @for (exp of purchase.expenses!; track exp.id) {
+                    <div class="detail-row"><span>{{ exp.description }}</span><span>{{ formatCurrency(exp.amount) }}</span></div>
+                  }
+                }
+                <button type="button" class="btn btn-secondary btn-sm" (click)="startEditPurchase(purchase)">تعديل الفاتورة</button>
               </div>
             }
           </article>

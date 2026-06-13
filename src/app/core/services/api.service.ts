@@ -13,15 +13,21 @@ import {
   InventoryValuation,
   LedgerEntry,
   LowStockProduct,
+  PaymentVoucher,
   Product,
   ProfitReport,
   Purchase,
+  ReceiptVoucher,
   Sale,
   SaleInvoice,
   SalesReport,
   StockMovement,
   UnitOfMeasure,
   UpdateProductRequest,
+  UpdatePurchaseRequest,
+  UpdateSaleRequest,
+  UpsertPaymentVoucherRequest,
+  UpsertReceiptVoucherRequest,
   Vendor
 } from '../models';
 
@@ -157,12 +163,52 @@ export class ApiService {
     return this.http.post<{ id: string }>(`${environment.apiUrl}/Sales`, request);
   }
 
+  updateSale(id: string, request: UpdateSaleRequest) {
+    return this.http.put(`${environment.apiUrl}/Sales/${id}`, request);
+  }
+
   getPurchases() {
     return this.http.get<Purchase[]>(`${environment.apiUrl}/Purchases`);
   }
 
   createPurchase(request: CreatePurchaseRequest) {
     return this.http.post<{ id: string }>(`${environment.apiUrl}/Purchases`, request);
+  }
+
+  updatePurchase(id: string, request: UpdatePurchaseRequest) {
+    return this.http.put(`${environment.apiUrl}/Purchases/${id}`, request);
+  }
+
+  getReceiptVouchers() {
+    return this.http.get<ReceiptVoucher[]>(`${environment.apiUrl}/ReceiptVouchers`);
+  }
+
+  getReceiptVoucherById(id: string) {
+    return this.http.get<ReceiptVoucher>(`${environment.apiUrl}/ReceiptVouchers/${id}`);
+  }
+
+  upsertReceiptVoucher(request: UpsertReceiptVoucherRequest) {
+    return this.http.post<{ id: string }>(`${environment.apiUrl}/ReceiptVouchers`, request);
+  }
+
+  cancelReceiptVoucher(id: string) {
+    return this.http.post(`${environment.apiUrl}/ReceiptVouchers/${id}/cancel`, {});
+  }
+
+  getPaymentVouchers() {
+    return this.http.get<PaymentVoucher[]>(`${environment.apiUrl}/PaymentVouchers`);
+  }
+
+  getPaymentVoucherById(id: string) {
+    return this.http.get<PaymentVoucher>(`${environment.apiUrl}/PaymentVouchers/${id}`);
+  }
+
+  upsertPaymentVoucher(request: UpsertPaymentVoucherRequest) {
+    return this.http.post<{ id: string }>(`${environment.apiUrl}/PaymentVouchers`, request);
+  }
+
+  cancelPaymentVoucher(id: string) {
+    return this.http.post(`${environment.apiUrl}/PaymentVouchers/${id}/cancel`, {});
   }
 
   getProfitReport(startDate?: string, endDate?: string) {

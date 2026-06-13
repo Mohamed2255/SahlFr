@@ -1,6 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api.service';
+import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { CartLine, Customer, PaymentMethods, Product, ProductUnit, Sale, SaleInvoice } from '../../core/models';
 import { InvoicePrintComponent } from '../../shared/invoice-print/invoice-print';
@@ -22,6 +23,8 @@ export class PosComponent implements OnInit {
   protected readonly expandedSaleId = signal<string | null>(null);
   protected readonly invoicePreview = signal<SaleInvoice | null>(null);
   protected readonly showInvoice = signal(false);
+  protected readonly editingSaleId = signal<string | null>(null);
+  editReason = '';
   protected readonly formatCurrency = formatCurrency;
   protected readonly formatDate = formatDate;
   protected readonly paymentMethods = PaymentMethods;
@@ -41,6 +44,7 @@ export class PosComponent implements OnInit {
   notes = '';
 
   constructor(
+    protected readonly auth: AuthService,
     private readonly api: ApiService,
     private readonly toast: ToastService
   ) {}
@@ -137,6 +141,25 @@ export class PosComponent implements OnInit {
     this.cart.update((lines) => lines.filter((_, i) => i !== index));
   }
 
+  updateCartQuantity(index: number, quantity: number): void {
+    if (quantity <= 0) {
+      this.removeFromCart(index);
+      return;
+    }
+    this.cart.update((lines) =>
+      lines.map((line, i) => (i === index ? { ...line, quantity } : line))
+    );
+  }
+
+  onCartQtyKeydown(event: KeyboardEvent, index: number): void {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      const next = (event.target as HTMLElement).closest('tr')?.nextElementSibling?.querySelector('input.qty-input') as HTMLInputElement | null;
+      next?.focus();
+      next?.select();
+    }
+  }
+
   subTotal(): number {
     return this.cart().reduce((s, l) => s + l.quantity * l.unitPrice - (l.discountAmount ?? 0), 0);
   }
@@ -152,6 +175,42 @@ export class PosComponent implements OnInit {
     }
     const total = this.total();
     if (this.paidAmount <= 0) this.paidAmount = total;
+
+    if (this.editingSaleId()) {
+      if (!this.editReason.trim()) {
+        this.toast.error('سبب التعديل مطلوب');
+        return;
+      }
+      this.submitting.set(true);
+      this.api.updateSale(this.editingSaleId()!, {
+        customerId: this.selectedCustomerId || undefined,
+        discountAmount: this.invoiceDiscount,
+        taxAmount: this.taxAmount,
+        paidAmount: this.paidAmount,
+        paymentMethod: this.paymentMethod,
+        notes: this.notes,
+        reason: this.editReason,
+        items: this.cart().map((l) => ({
+          productId: l.product.id,
+          productUnitId: l.unit.id,
+          quantity: l.quantity,
+          unitPrice: l.unitPrice,
+          discountAmount: l.discountAmount ?? 0
+        }))
+      }).subscribe({
+        next: () => {
+          this.submitting.set(false);
+          this.toast.success('تم تعديل الفاتورة');
+          this.resetCart();
+          this.loadData();
+        },
+        error: (err) => {
+          this.submitting.set(false);
+          this.toast.error(getApiErrorMessage(err, 'فشل تعديل الفاتورة'));
+        }
+      });
+      return;
+    }
 
     this.submitting.set(true);
     this.api
@@ -174,11 +233,7 @@ export class PosComponent implements OnInit {
         next: (res) => {
           this.submitting.set(false);
           this.toast.success('تم إنشاء الفاتورة بنجاح');
-          this.cart.set([]);
-          this.invoiceDiscount = 0;
-          this.taxAmount = 0;
-          this.paidAmount = 0;
-          this.notes = '';
+          this.resetCart();
           this.loadData();
           if (res?.id) this.openInvoice(res.id);
         },
@@ -201,5 +256,34 @@ export class PosComponent implements OnInit {
       },
       error: () => this.toast.error('تعذر تحميل الفاتورة')
     });
+  }
+
+  loadSaleForEdit(sale: Sale): void {
+    this.editingSaleId.set(sale.id);
+    this.editReason = '';
+    this.invoiceDiscount = sale.discountAmount;
+    this.taxAmount = sale.taxAmount;
+    this.paidAmount = sale.paidAmount;
+    this.notes = sale.notes;
+    this.paymentMethod = PaymentMethods.find((m) => m.label === sale.paymentMethod)?.value ?? 0;
+    this.selectedCustomerId = this.customers().find((c) => c.name === sale.customerName)?.id ?? '';
+    this.cart.set(
+      sale.items.map((item) => {
+        const product = this.products().find((p) => p.name === item.productName)!;
+        const unit = product.units.find((u) => u.name === item.unitName)!;
+        return { product, unit, quantity: item.quantity, unitPrice: item.unitPrice, discountAmount: item.discountAmount };
+      })
+    );
+    this.toast.success('تم تحميل الفاتورة للتعديل');
+  }
+
+  resetCart(): void {
+    this.cart.set([]);
+    this.invoiceDiscount = 0;
+    this.taxAmount = 0;
+    this.paidAmount = 0;
+    this.notes = '';
+    this.editingSaleId.set(null);
+    this.editReason = '';
   }
 }

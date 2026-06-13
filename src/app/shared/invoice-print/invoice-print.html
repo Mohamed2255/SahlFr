@@ -70,6 +70,18 @@
       @if (inv.dueAmount > 0) {
         <div class="total-row due"><span>المتبقي</span><strong>{{ formatCurrency(inv.dueAmount) }}</strong></div>
       }
+      @if (inv.customerName && inv.previousBalance != null) {
+        <div class="account-summary">
+          <h3>كشف حساب العميل</h3>
+          <div class="total-row"><span>الرصيد السابق</span><span>{{ formatCurrency(inv.previousBalance) }}</span></div>
+          <div class="total-row"><span>فاتورة حالية</span><span>{{ formatCurrency(inv.totalAmount) }}</span></div>
+          <div class="total-row"><span>المدفوعات المطبقة</span><span>{{ formatCurrency(inv.paymentsApplied ?? 0) }}</span></div>
+          <div class="total-row grand"><span>الرصيد الجديد</span><strong>{{ formatCurrency(inv.newBalance ?? 0) }}</strong></div>
+          @if (inv.currentAccountBalance != null) {
+            <div class="total-row muted-row"><span>الرصيد الحالي</span><span>{{ formatCurrency(inv.currentAccountBalance) }}</span></div>
+          }
+        </div>
+      }
     </footer>
 
     @if (inv.notes) {

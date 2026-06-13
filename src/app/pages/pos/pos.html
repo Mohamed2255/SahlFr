@@ -64,7 +64,17 @@
           @for (line of cart(); track $index; let i = $index) {
             <tr>
               <td>{{ line.product.name }}<br /><small class="muted">{{ line.unit.name }}</small></td>
-              <td>{{ line.quantity }}</td>
+              <td>
+                <input
+                  type="number"
+                  class="qty-input"
+                  [ngModel]="line.quantity"
+                  (ngModelChange)="updateCartQuantity(i, $event)"
+                  (keydown)="onCartQtyKeydown($event, i)"
+                  min="0.01"
+                  step="0.01"
+                />
+              </td>
               <td>{{ formatCurrency(line.quantity * line.unitPrice - (line.discountAmount ?? 0)) }}</td>
               <td><button type="button" class="btn btn-danger btn-sm" (click)="removeFromCart(i)">×</button></td>
             </tr>
@@ -97,9 +107,15 @@
     </div>
 
     <div class="cart-footer">
+      @if (editingSaleId()) {
+        <label class="full-label"><span>سبب التعديل</span><input [(ngModel)]="editReason" /></label>
+      }
       <button type="button" class="btn btn-primary" [disabled]="submitting() || !cart().length" (click)="submitSale()">
-        {{ submitting() ? 'جاري الحفظ...' : 'إتمام البيع' }}
+        {{ submitting() ? 'جاري الحفظ...' : (editingSaleId() ? 'حفظ التعديل' : 'إتمام البيع') }}
       </button>
+      @if (editingSaleId()) {
+        <button type="button" class="btn btn-ghost" (click)="resetCart()">إلغاء التعديل</button>
+      }
     </div>
   </div>
 </div>
@@ -130,6 +146,9 @@
               <div class="detail-row"><span class="badge danger">متبقي: {{ formatCurrency(sale.dueAmount) }}</span></div>
             }
             <button type="button" class="btn btn-secondary btn-sm" (click)="openInvoice(sale.id)">🖨️ عرض / طباعة</button>
+            @if (auth.isAdmin()) {
+              <button type="button" class="btn btn-secondary btn-sm" (click)="loadSaleForEdit(sale)">✏️ تعديل</button>
+            }
           </div>
         }
       </div>

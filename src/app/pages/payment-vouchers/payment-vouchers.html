@@ -1,0 +1,75 @@
+<div class="page-header">
+  <div><h1>سندات الصرف</h1><p>تسجيل المدفوعات للموردين</p></div>
+  <button type="button" class="btn btn-primary" (click)="openCreate()">+ سند صرف</button>
+</div>
+
+@if (loading()) {
+  <div class="loading-state">جاري التحميل...</div>
+} @else {
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr><th>رقم السند</th><th>التاريخ</th><th>المورد</th><th>المبلغ</th><th>الحالة</th><th>إجراءات</th></tr>
+      </thead>
+      <tbody>
+        @for (v of vouchers(); track v.id) {
+          <tr>
+            <td><strong>{{ v.voucherNumber }}</strong></td>
+            <td>{{ formatDate(v.voucherDate) }}</td>
+            <td>{{ v.vendorName }}</td>
+            <td>{{ formatCurrency(v.amount) }}</td>
+            <td><span class="badge">{{ v.status }}</span></td>
+            <td class="actions">
+              <button type="button" class="btn btn-secondary btn-sm" (click)="print(v)">طباعة</button>
+              @if (v.status === 'Posted') {
+                <button type="button" class="btn btn-danger btn-sm" (click)="cancel(v.id)">إلغاء</button>
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="6" class="muted">لا توجد سندات</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+@if (showForm()) {
+  <div class="modal-backdrop" (click)="showForm.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>سند صرف جديد</h2>
+      <div class="form-row">
+        <label><span>المورد</span>
+          <select [(ngModel)]="form.vendorId" (ngModelChange)="onVendorChange()">
+            <option value="">اختر مورداً</option>
+            @for (v of vendors(); track v.id) { <option [value]="v.id">{{ v.name }} ({{ formatCurrency(v.balance) }})</option> }
+          </select>
+        </label>
+        <label><span>المبلغ</span><input type="number" [(ngModel)]="form.amount" min="0.01" step="0.01" /></label>
+        <label><span>طريقة الدفع</span>
+          <select [(ngModel)]="form.paymentMethod">
+            @for (m of paymentMethods; track m.value) { <option [value]="m.value">{{ m.label }}</option> }
+          </select>
+        </label>
+      </div>
+      <div class="form-row">
+        <label><span>رقم الشيك</span><input [(ngModel)]="form.chequeNumber" /></label>
+        <label><span>مرجع بنكي</span><input [(ngModel)]="form.bankReference" /></label>
+      </div>
+      <div class="form-row">
+        <label class="full-label"><span>تخصيص لفاتورة شراء (اختياري)</span>
+          <select [(ngModel)]="form.allocationPurchaseId">
+            <option value="">دفعة مقدمة / على الحساب</option>
+            @for (p of vendorPurchases(); track p.id) { <option [value]="p.id">{{ p.purchaseNumber }} — {{ formatCurrency(p.dueAmount) }}</option> }
+          </select>
+        </label>
+        <label><span>مبلغ التخصيص</span><input type="number" [(ngModel)]="form.allocationAmount" min="0" /></label>
+      </div>
+      <label class="full-label"><span>ملاحظات</span><input [(ngModel)]="form.notes" /></label>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" (click)="showForm.set(false)">إلغاء</button>
+        <button type="button" class="btn btn-primary" (click)="save()">حفظ وترحيل</button>
+      </div>
+    </div>
+  </div>
+}

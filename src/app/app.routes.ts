@@ -24,6 +24,16 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/purchases/purchases').then((m) => m.PurchasesComponent)
       },
       {
+        path: 'receipt-vouchers',
+        canActivate: [adminGuard],
+        loadComponent: () => import('./pages/receipt-vouchers/receipt-vouchers').then((m) => m.ReceiptVouchersComponent)
+      },
+      {
+        path: 'payment-vouchers',
+        canActivate: [adminGuard],
+        loadComponent: () => import('./pages/payment-vouchers/payment-vouchers').then((m) => m.PaymentVouchersComponent)
+      },
+      {
         path: 'vendors',
         canActivate: [adminGuard],
         loadComponent: () => import('./pages/vendors/vendors').then((m) => m.VendorsComponent)

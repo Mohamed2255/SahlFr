@@ -36,6 +36,14 @@
           <span class="nav-icon">🚚</span>
           @if (!collapsed()) { <span>المشتريات</span> }
         </a>
+        <a routerLink="/receipt-vouchers" routerLinkActive="active">
+          <span class="nav-icon">💵</span>
+          @if (!collapsed()) { <span>سندات القبض</span> }
+        </a>
+        <a routerLink="/payment-vouchers" routerLinkActive="active">
+          <span class="nav-icon">💸</span>
+          @if (!collapsed()) { <span>سندات الصرف</span> }
+        </a>
         <a routerLink="/vendors" routerLinkActive="active">
           <span class="nav-icon">🏭</span>
           @if (!collapsed()) { <span>الموردون</span> }
