@@ -21,12 +21,33 @@
 } @else if (tab() === 'stock') {
   <div class="table-card">
     <table>
-      <thead><tr><th>المنتج</th><th>SKU</th><th>الكمية</th><th>الحد الأدنى</th><th>الحالة</th>@if (auth.isAdmin()) {<th></th>}</tr></thead>
+      <thead><tr><th>المنتج</th><th>SKU</th><th>سعر البيع</th><th>الكمية</th><th>الحد الأدنى</th><th>الحالة</th>@if (auth.isAdmin()) {<th></th>}</tr></thead>
       <tbody>
         @for (p of products(); track p.id) {
           <tr>
             <td><strong>{{ p.name }}</strong></td>
             <td>{{ p.sku }}</td>
+            <td>
+              <div class="units-price-list">
+                @for (unit of p.units; track unit.id) {
+                  <div class="inline-price-edit">
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      [value]="priceDraft(unit.id)"
+                      (input)="setPriceDraft(unit.id, $any($event.target).value)"
+                      (blur)="saveSellingPrice(p, unit)"
+                      (keyup.enter)="$any($event.target).blur()"
+                      class="minimal-input"
+                      [class.loading]="savingPriceUnitId() === unit.id"
+                      [disabled]="savingPriceUnitId() === unit.id || !auth.isAdmin()"
+                    />
+                    <span class="unit-label">{{ unit.name }}</span>
+                  </div>
+                }
+              </div>
+            </td>
             <td>{{ p.stockQuantity }} {{ p.baseUnitName }}</td>
             <td>{{ p.minQuantity }}</td>
             <td>

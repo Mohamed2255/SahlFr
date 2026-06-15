@@ -83,7 +83,7 @@ export class PosComponent implements OnInit {
     this.api.getProductByBarcode(code).subscribe({
       next: (product) => {
         this.selectedProductId = product.id;
-        const unit = product.units.find((u) => u.isBase) ?? product.units[0];
+        const unit = product.units.reduce((max, u) => u.conversionFactor > max.conversionFactor ? u : max, product.units[0]);
         if (unit) {
           this.selectedUnitId = unit.id;
           this.unitPrice = unit.sellingPrice;
@@ -98,7 +98,7 @@ export class PosComponent implements OnInit {
 
   selectProduct(product: Product): void {
     this.selectedProductId = product.id;
-    const unit = product.units.find((u) => u.isBase) ?? product.units[0];
+    const unit = product.units.reduce((max, u) => u.conversionFactor > max.conversionFactor ? u : max, product.units[0]);
     this.selectedUnitId = unit?.id ?? '';
     this.unitPrice = unit?.sellingPrice ?? 0;
   }
@@ -148,6 +148,24 @@ export class PosComponent implements OnInit {
     }
     this.cart.update((lines) =>
       lines.map((line, i) => (i === index ? { ...line, quantity } : line))
+    );
+  }
+
+  updateCartPrice(index: number, unitPrice: number): void {
+    if (unitPrice < 0) return;
+    this.cart.update((lines) =>
+      lines.map((line, i) => (i === index ? { ...line, unitPrice } : line))
+    );
+  }
+
+  updateCartUnit(index: number, unitId: string): void {
+    this.cart.update((lines) =>
+      lines.map((line, i) => {
+        if (i !== index) return line;
+        const newUnit = line.product.units.find((u) => u.id === unitId);
+        if (!newUnit) return line;
+        return { ...line, unit: newUnit, unitPrice: newUnit.sellingPrice };
+      })
     );
   }
 

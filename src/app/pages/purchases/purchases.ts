@@ -72,9 +72,9 @@ export class PurchasesComponent implements OnInit {
 
   onProductChange(): void {
     const product = this.selectedProduct();
-    const firstUnit = product?.units[0];
-    this.selectedUnitId = firstUnit?.id ?? '';
-    this.unitPrice = firstUnit?.costPrice ?? 0;
+    const defaultUnit = product?.units?.reduce((max, u) => u.conversionFactor > max.conversionFactor ? u : max, product.units[0]);
+    this.selectedUnitId = defaultUnit?.id ?? '';
+    this.unitPrice = defaultUnit?.costPrice ?? 0;
   }
 
   onUnitChange(): void {
@@ -125,6 +125,17 @@ export class PurchasesComponent implements OnInit {
     }
     this.cart.update((lines) =>
       lines.map((line, i) => (i === index ? { ...line, quantity } : line))
+    );
+  }
+
+  updateCartUnit(index: number, unitId: string): void {
+    this.cart.update((lines) =>
+      lines.map((line, i) => {
+        if (i !== index) return line;
+        const newUnit = line.product.units.find((u) => u.id === unitId);
+        if (!newUnit) return line;
+        return { ...line, unit: newUnit, unitPrice: newUnit.costPrice };
+      })
     );
   }
 

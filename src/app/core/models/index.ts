@@ -139,6 +139,51 @@ export interface StockMovement {
   createdDate: string;
 }
 
+export interface CashRegisterTransaction {
+  id: string;
+  transactionDate: string;
+  transactionType: string;
+  direction: 'Inflow' | 'Outflow' | string;
+  amount: number;
+  referenceType: string;
+  referenceId?: string;
+  referenceNumber: string;
+  description: string;
+  userName: string;
+}
+
+export interface CashRegister {
+  id: string;
+  registerNumber: string;
+  businessDate: string;
+  openingBalance: number;
+  totalSales: number;
+  totalInflows: number;
+  totalExpenses: number;
+  totalOutflows: number;
+  currentClosingBalance: number;
+  actualClosingBalance?: number;
+  status: string;
+  openedAt: string;
+  closedAt?: string;
+  openedByName: string;
+  closedByName?: string;
+  notes: string;
+  closingNotes: string;
+  transactions: CashRegisterTransaction[];
+}
+
+export interface OpenCashRegisterRequest {
+  businessDate?: string;
+  openingBalance: number;
+  notes?: string;
+}
+
+export interface CloseCashRegisterRequest {
+  actualClosingBalance?: number;
+  closingNotes?: string;
+}
+
 export interface LowStockProduct {
   productId: string;
   name: string;

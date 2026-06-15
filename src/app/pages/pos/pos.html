@@ -51,36 +51,60 @@
     </div>
 
     @if (cart().length) {
-      <table>
-        <thead>
-          <tr>
-            <th>المنتج</th>
-            <th>الكمية</th>
-            <th>السعر</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (line of cart(); track $index; let i = $index) {
+      <div style="overflow-x: auto; margin-bottom: 1rem;">
+        <table>
+          <thead>
             <tr>
-              <td>{{ line.product.name }}<br /><small class="muted">{{ line.unit.name }}</small></td>
-              <td>
-                <input
-                  type="number"
-                  class="qty-input"
-                  [ngModel]="line.quantity"
-                  (ngModelChange)="updateCartQuantity(i, $event)"
-                  (keydown)="onCartQtyKeydown($event, i)"
-                  min="0.01"
-                  step="0.01"
-                />
-              </td>
-              <td>{{ formatCurrency(line.quantity * line.unitPrice - (line.discountAmount ?? 0)) }}</td>
-              <td><button type="button" class="btn btn-danger btn-sm" (click)="removeFromCart(i)">×</button></td>
+              <th>المنتج</th>
+              <th>الكمية</th>
+              <th>سعر الوحدة</th>
+              <th>الإجمالي</th>
+              <th></th>
             </tr>
-          }
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            @for (line of cart(); track $index; let i = $index) {
+              <tr>
+                <td>
+                  {{ line.product.name }}<br />
+                  <select
+                    class="unit-select"
+                    [ngModel]="line.unit.id"
+                    (ngModelChange)="updateCartUnit(i, $event)"
+                  >
+                    @for (u of line.product.units; track u.id) {
+                      <option [value]="u.id">{{ u.name }}</option>
+                    }
+                  </select>
+                </td>
+                <td>
+                  <input
+                    type="number"
+                    class="qty-input"
+                    [ngModel]="line.quantity"
+                    (ngModelChange)="updateCartQuantity(i, $event)"
+                    (keydown)="onCartQtyKeydown($event, i)"
+                    min="0.01"
+                    step="0.01"
+                  />
+                </td>
+                <td>
+                  <input
+                    type="number"
+                    class="qty-input"
+                    [ngModel]="line.unitPrice"
+                    (ngModelChange)="updateCartPrice(i, $event)"
+                    min="0"
+                    step="0.01"
+                  />
+                </td>
+                <td>{{ formatCurrency(line.quantity * line.unitPrice - (line.discountAmount ?? 0)) }}</td>
+                <td><button type="button" class="btn btn-danger btn-sm" (click)="removeFromCart(i)">×</button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     } @else {
       <p class="muted empty-cart">السلة فارغة — اختر منتجاً</p>
     }

@@ -14,6 +14,7 @@ export const routes: Routes = [
     children: [
       { path: '', loadComponent: () => import('./pages/dashboard/dashboard').then((m) => m.DashboardComponent) },
       { path: 'pos', loadComponent: () => import('./pages/pos/pos').then((m) => m.PosComponent) },
+      { path: 'register', loadComponent: () => import('./pages/register/register').then((m) => m.RegisterComponent) },
       { path: 'products', loadComponent: () => import('./pages/products/products').then((m) => m.ProductsComponent) },
       { path: 'inventory', loadComponent: () => import('./pages/inventory/inventory').then((m) => m.InventoryComponent) },
       { path: 'customers', loadComponent: () => import('./pages/customers/customers').then((m) => m.CustomersComponent) },

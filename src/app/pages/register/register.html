@@ -1,0 +1,154 @@
+<div class="page-header">
+  <div>
+    <h1>صندوق النقد اليومي</h1>
+    <p>متابعة الصندوق المفتوح، المبيعات، المصروفات، والرصيد الختامي بنهاية اليوم.</p>
+  </div>
+  @if (current(); as register) {
+    <span class="register-status">{{ register.registerNumber }} · {{ register.status === 'Open' ? 'مفتوح' : 'مغلق' }}</span>
+  }
+</div>
+
+@if (loading()) {
+  <div class="loading-state">جاري تحميل الصندوق...</div>
+} @else if (current(); as register) {
+  <div class="stats-grid register-stats">
+    <div class="stat-card">
+      <span class="stat-label">الرصيد الافتتاحي</span>
+      <span class="stat-value">{{ formatCurrency(register.openingBalance) }}</span>
+    </div>
+    <div class="stat-card success">
+      <span class="stat-label">إجمالي المبيعات / المقبوضات</span>
+      <span class="stat-value">{{ formatCurrency(register.totalInflows) }}</span>
+    </div>
+    <div class="stat-card danger">
+      <span class="stat-label">إجمالي المصروفات / المدفوعات</span>
+      <span class="stat-value">{{ formatCurrency(register.totalOutflows) }}</span>
+    </div>
+    <div class="stat-card accent">
+      <span class="stat-label">الرصيد الختامي الحالي</span>
+      <span class="stat-value">{{ formatCurrency(register.currentClosingBalance) }}</span>
+    </div>
+  </div>
+
+  <div class="register-grid">
+    <section class="panel close-panel">
+      <div class="panel-title">
+        <div>
+          <h2>إغلاق الصندوق</h2>
+          <p class="muted">تم الفتح بواسطة {{ register.openedByName }} في {{ formatDate(register.openedAt) }}</p>
+        </div>
+      </div>
+
+      <div class="register-summary">
+        <div class="detail-row">
+          <span>رصيد النظام</span>
+          <strong>{{ formatCurrency(register.currentClosingBalance) }}</strong>
+        </div>
+        <div class="detail-row">
+          <span>النقد الفعلي</span>
+          <input type="number" [(ngModel)]="closeForm.actualClosingBalance" min="0" step="0.01" />
+        </div>
+        <div class="detail-row">
+          <span>الفرق</span>
+          <span class="badge" [class.success]="variance() === 0" [class.warning]="variance() !== 0">
+            {{ formatCurrency(variance()) }}
+          </span>
+        </div>
+      </div>
+
+      <label class="stacked-field">
+        <span>ملاحظات الإغلاق</span>
+        <textarea rows="3" [(ngModel)]="closeForm.closingNotes"></textarea>
+      </label>
+
+      <button type="button" class="btn btn-primary close-btn" [disabled]="submitting()" (click)="closeRegister()">
+        {{ submitting() ? 'جاري الإغلاق...' : 'إغلاق الصندوق' }}
+      </button>
+    </section>
+
+    <section class="panel movement-panel">
+      <div class="panel-title">
+        <h2>حركات الصندوق</h2>
+        <span class="muted">{{ register.transactions.length }} حركة</span>
+      </div>
+
+      <div class="movement-list">
+        @for (tx of register.transactions; track tx.id) {
+          <div class="movement-row">
+            <div>
+              <span class="badge" [class.success]="directionClass(tx) === 'success'" [class.danger]="directionClass(tx) === 'danger'">
+                {{ tx.direction === 'Inflow' ? 'وارد' : 'صادر' }}
+              </span>
+              <strong>{{ tx.referenceNumber || tx.transactionType }}</strong>
+              <small class="muted">{{ tx.description }} · {{ tx.userName }} · {{ formatDate(tx.transactionDate) }}</small>
+            </div>
+            <strong [class.outflow]="tx.direction === 'Outflow'">
+              {{ tx.direction === 'Outflow' ? '-' : '+' }}{{ formatCurrency(tx.amount) }}
+            </strong>
+          </div>
+        } @empty {
+          <p class="muted empty-state">لا توجد حركات مسجلة بعد.</p>
+        }
+      </div>
+    </section>
+  </div>
+} @else {
+  <section class="panel open-panel">
+    <div class="panel-title">
+      <div>
+        <h2>فتح صندوق جديد</h2>
+        <p class="muted">ابدأ اليوم بإدخال الرصيد الافتتاحي للصندوق.</p>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label>
+        <span>تاريخ العمل</span>
+        <input type="date" [(ngModel)]="openForm.businessDate" />
+      </label>
+      <label>
+        <span>الرصيد الافتتاحي</span>
+        <input type="number" [(ngModel)]="openForm.openingBalance" min="0" step="0.01" />
+      </label>
+    </div>
+
+    <label class="stacked-field">
+      <span>ملاحظات الفتح</span>
+      <textarea rows="3" [(ngModel)]="openForm.notes"></textarea>
+    </label>
+
+    <button type="button" class="btn btn-primary" [disabled]="submitting()" (click)="openRegister()">
+      {{ submitting() ? 'جاري الفتح...' : 'فتح الصندوق' }}
+    </button>
+  </section>
+}
+
+<section class="panel history-panel">
+  <div class="panel-title">
+    <h2>السجلات السابقة</h2>
+  </div>
+
+  <div class="history-grid">
+    @for (item of history(); track item.id) {
+      <div class="register-history-item">
+        <div>
+          <strong>{{ item.registerNumber }}</strong>
+          <small class="muted">{{ formatDate(item.openedAt) }}</small>
+        </div>
+        <span class="badge" [class.success]="item.status === 'Open'" [class.warning]="item.status === 'Closed'">
+          {{ item.status === 'Open' ? 'مفتوح' : 'مغلق' }}
+        </span>
+        <div class="detail-row">
+          <span>الافتتاحي</span>
+          <strong>{{ formatCurrency(item.openingBalance) }}</strong>
+        </div>
+        <div class="detail-row">
+          <span>الختامي</span>
+          <strong>{{ formatCurrency(item.currentClosingBalance) }}</strong>
+        </div>
+      </div>
+    } @empty {
+      <p class="muted empty-state">لا يوجد سجلات سابقة.</p>
+    }
+  </div>
+</section>

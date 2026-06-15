@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
-import { LowStockProduct, Product, StockMovement } from '../../core/models';
+import { LowStockProduct, Product, ProductUnit, StockMovement } from '../../core/models';
 import { formatDate, getApiErrorMessage } from '../../core/utils/helpers';
 
 @Component({
@@ -19,6 +19,8 @@ export class InventoryComponent implements OnInit {
   protected readonly movements = signal<StockMovement[]>([]);
   protected readonly lowStock = signal<LowStockProduct[]>([]);
   protected readonly showAdjust = signal(false);
+  protected readonly priceDrafts = signal<Record<string, number>>({});
+  protected readonly savingPriceUnitId = signal<string | null>(null);
   protected readonly formatDate = formatDate;
 
   adjustForm = { productId: '', newQuantity: 0, reason: '' };
@@ -36,7 +38,11 @@ export class InventoryComponent implements OnInit {
   load(): void {
     this.loading.set(true);
     this.api.getProducts().subscribe({
-      next: (p) => { this.products.set(p); this.loading.set(false); },
+      next: (p) => {
+        this.products.set(p);
+        this.priceDrafts.set(this.buildPriceDrafts(p));
+        this.loading.set(false);
+      },
       error: () => this.loading.set(false)
     });
     this.api.getStockMovements().subscribe({ next: (m) => this.movements.set(m) });
@@ -61,5 +67,59 @@ export class InventoryComponent implements OnInit {
       },
       error: (e) => this.toast.error(getApiErrorMessage(e))
     });
+  }
+
+  priceDraft(unitId: string): number {
+    return this.priceDrafts()[unitId] ?? 0;
+  }
+
+  setPriceDraft(unitId: string, value: number | string): void {
+    const parsed = Number(value);
+    this.priceDrafts.update((drafts) => ({
+      ...drafts,
+      [unitId]: Number.isFinite(parsed) ? parsed : 0
+    }));
+  }
+
+  saveSellingPrice(product: Product, unit: ProductUnit): void {
+    const sellingPrice = this.priceDraft(unit.id);
+    if (sellingPrice < 0) {
+      this.toast.error('لا يمكن أن يكون سعر البيع بالسالب');
+      return;
+    }
+
+    if (sellingPrice === unit.sellingPrice || this.savingPriceUnitId() === unit.id) return;
+
+    this.savingPriceUnitId.set(unit.id);
+    this.api.updateProductUnitSellingPrice(product.id, unit.id, sellingPrice).subscribe({
+      next: () => {
+        this.products.update((products) =>
+          products.map((p) =>
+            p.id === product.id
+              ? {
+                  ...p,
+                  units: p.units.map((u) => (u.id === unit.id ? { ...u, sellingPrice } : u))
+                }
+              : p
+          )
+        );
+        this.savingPriceUnitId.set(null);
+        this.toast.success('تم تحديث سعر البيع');
+      },
+      error: (err) => {
+        this.savingPriceUnitId.set(null);
+        this.setPriceDraft(unit.id, unit.sellingPrice);
+        this.toast.error(getApiErrorMessage(err, 'فشل تحديث سعر البيع'));
+      }
+    });
+  }
+
+  private buildPriceDrafts(products: Product[]): Record<string, number> {
+    return products.reduce<Record<string, number>>((drafts, product) => {
+      product.units.forEach((unit) => {
+        drafts[unit.id] = unit.sellingPrice;
+      });
+      return drafts;
+    }, {});
   }
 }

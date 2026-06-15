@@ -1,3 +1,57 @@
 .text-danger { color: var(--danger); font-weight: 700; }
 .text-success { color: var(--success); font-weight: 700; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem; }
+
+.units-price-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.inline-price-edit {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.minimal-input {
+  width: 4rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  border-bottom: 1px dashed transparent;
+  border-radius: 0;
+  transition: all 0.2s;
+  text-align: center;
+
+  /* Remove arrows from number input */
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  -moz-appearance: textfield;
+
+  &:hover {
+    border-bottom-color: var(--text-muted);
+  }
+
+  &:focus {
+    outline: none;
+    border-bottom-color: var(--accent);
+    border-bottom-style: solid;
+  }
+
+  &.loading {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+}
+
+.unit-label {
+  font-size: 0.9em;
+  color: var(--text-muted);
+}

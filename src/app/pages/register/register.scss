@@ -1,0 +1,159 @@
+.register-status {
+  align-self: center;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--accent);
+  background: var(--accent-soft);
+  font-weight: 800;
+  padding: 0.45rem 0.75rem;
+}
+
+.register-stats {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.register-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.2fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.panel-title {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0 0 0.2rem;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.register-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  padding: 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+
+  .detail-row {
+    align-items: center;
+  }
+
+  input {
+    width: min(170px, 100%);
+  }
+}
+
+.stacked-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+
+  span {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+}
+
+.close-btn {
+  width: 100%;
+}
+
+.movement-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  max-height: 520px;
+  overflow: auto;
+}
+
+.movement-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-subtle);
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+
+  small {
+    line-height: 1.4;
+  }
+}
+
+.outflow {
+  color: var(--danger);
+}
+
+.open-panel {
+  max-width: 780px;
+  margin-bottom: 1rem;
+}
+
+.history-panel {
+  margin-top: 1rem;
+}
+
+.history-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+
+.register-history-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-subtle);
+
+  small {
+    display: block;
+    margin-top: 0.15rem;
+  }
+}
+
+.empty-state {
+  margin: 0;
+  padding: 1rem 0;
+}
+
+@media (max-width: 1150px) {
+  .register-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .register-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .register-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .movement-row {
+    flex-direction: column;
+  }
+}

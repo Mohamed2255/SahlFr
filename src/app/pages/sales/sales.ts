@@ -59,9 +59,9 @@ export class SalesComponent implements OnInit {
 
   onProductChange(): void {
     const product = this.selectedProduct();
-    const firstUnit = product?.units[0];
-    this.selectedUnitId = firstUnit?.id ?? '';
-    this.unitPrice = firstUnit?.sellingPrice ?? 0;
+    const defaultUnit = product?.units?.reduce((max, u) => u.conversionFactor > max.conversionFactor ? u : max, product.units[0]);
+    this.selectedUnitId = defaultUnit?.id ?? '';
+    this.unitPrice = defaultUnit?.sellingPrice ?? 0;
   }
 
   onUnitChange(): void {
@@ -103,6 +103,24 @@ export class SalesComponent implements OnInit {
 
   removeFromCart(index: number): void {
     this.cart.update((lines) => lines.filter((_, i) => i !== index));
+  }
+
+  updateCartPrice(index: number, unitPrice: number): void {
+    if (unitPrice < 0) return;
+    this.cart.update((lines) =>
+      lines.map((line, i) => (i === index ? { ...line, unitPrice } : line))
+    );
+  }
+
+  updateCartUnit(index: number, unitId: string): void {
+    this.cart.update((lines) =>
+      lines.map((line, i) => {
+        if (i !== index) return line;
+        const newUnit = line.product.units.find((u) => u.id === unitId);
+        if (!newUnit) return line;
+        return { ...line, unit: newUnit, unitPrice: newUnit.sellingPrice };
+      })
+    );
   }
 
   cartTotal(): number {

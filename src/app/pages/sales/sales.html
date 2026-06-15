@@ -69,9 +69,28 @@
             @for (line of cart(); track $index) {
               <tr>
                 <td>{{ line.product.name }}</td>
-                <td>{{ line.unit.name }}</td>
+                <td>
+                  <select
+                    class="unit-select"
+                    [ngModel]="line.unit.id"
+                    (ngModelChange)="updateCartUnit($index, $event)"
+                  >
+                    @for (u of line.product.units; track u.id) {
+                      <option [value]="u.id">{{ u.name }}</option>
+                    }
+                  </select>
+                </td>
                 <td>{{ line.quantity }}</td>
-                <td>{{ formatCurrency(line.unitPrice) }}</td>
+                <td>
+                  <input
+                    type="number"
+                    class="qty-input"
+                    [ngModel]="line.unitPrice"
+                    (ngModelChange)="updateCartPrice($index, $event)"
+                    min="0"
+                    step="0.01"
+                  />
+                </td>
                 <td>{{ formatCurrency(line.quantity * line.unitPrice) }}</td>
                 <td>
                   <button type="button" class="btn btn-ghost btn-sm" (click)="removeFromCart($index)">حذف</button>

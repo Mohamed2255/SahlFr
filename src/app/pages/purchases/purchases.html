@@ -69,7 +69,17 @@
             @for (line of cart(); track $index; let i = $index) {
               <tr>
                 <td>{{ line.product.name }}</td>
-                <td>{{ line.unit.name }}</td>
+                <td>
+                  <select
+                    class="unit-select"
+                    [ngModel]="line.unit.id"
+                    (ngModelChange)="updateCartUnit(i, $event)"
+                  >
+                    @for (u of line.product.units; track u.id) {
+                      <option [value]="u.id">{{ u.name }}</option>
+                    }
+                  </select>
+                </td>
                 <td>
                   <input
                     type="number"

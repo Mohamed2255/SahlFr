@@ -4,6 +4,8 @@ import { environment } from '../../../environments/environment';
 import {
   AgingItem,
   AppUser,
+  CashRegister,
+  CloseCashRegisterRequest,
   Category,
   CreateProductRequest,
   CreatePurchaseRequest,
@@ -13,6 +15,7 @@ import {
   InventoryValuation,
   LedgerEntry,
   LowStockProduct,
+  OpenCashRegisterRequest,
   PaymentVoucher,
   Product,
   ProfitReport,
@@ -56,6 +59,12 @@ export class ApiService {
 
   updateProduct(id: string, request: UpdateProductRequest) {
     return this.http.put(`${environment.apiUrl}/Products/${id}`, request);
+  }
+
+  updateProductUnitSellingPrice(productId: string, unitId: string, sellingPrice: number) {
+    return this.http.patch(`${environment.apiUrl}/Products/${productId}/units/${unitId}/selling-price`, {
+      sellingPrice
+    });
   }
 
   deleteProduct(id: string) {
@@ -130,6 +139,24 @@ export class ApiService {
 
   adjustStock(productId: string, newQuantity: number, reason: string) {
     return this.http.post(`${environment.apiUrl}/Inventory/adjust`, { productId, newQuantity, reason });
+  }
+
+  getCurrentCashRegister() {
+    return this.http.get<CashRegister | null>(`${environment.apiUrl}/CashRegisters/current`);
+  }
+
+  getCashRegisterHistory(limit = 15) {
+    return this.http.get<CashRegister[]>(`${environment.apiUrl}/CashRegisters/history`, {
+      params: new HttpParams().set('limit', limit)
+    });
+  }
+
+  openCashRegister(request: OpenCashRegisterRequest) {
+    return this.http.post<{ id: string }>(`${environment.apiUrl}/CashRegisters/open`, request);
+  }
+
+  closeCashRegister(id: string, request: CloseCashRegisterRequest) {
+    return this.http.post(`${environment.apiUrl}/CashRegisters/${id}/close`, request);
   }
 
   getUsers() {
