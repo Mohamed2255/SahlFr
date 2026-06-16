@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:5161/api'
+  apiUrl: 'https://sahlerp.runasp.net/api'
 };
