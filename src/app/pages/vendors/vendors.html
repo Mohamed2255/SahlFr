@@ -43,13 +43,27 @@
     <div class="modal" (click)="$event.stopPropagation()">
       <h2>{{ form.id ? 'تعديل مورد' : 'مورد جديد' }}</h2>
       <div class="form-row">
-        <label><span>الاسم</span><input [(ngModel)]="form.name" /></label>
-        <label><span>الجوال</span><input [(ngModel)]="form.mobile" /></label>
-        <label><span>البريد</span><input [(ngModel)]="form.email" /></label>
+        <label>
+          <span>الاسم</span>
+          <input [(ngModel)]="form.name" />
+          @if (!form.name.trim()) { <span class="error-text">الاسم مطلوب.</span> }
+        </label>
+        <label>
+          <span>الجوال</span>
+          <input [(ngModel)]="form.mobile" />
+          @if (!form.mobile.trim()) { <span class="error-text">رقم الهاتف مطلوب.</span> }
+          @else if (!isValidMobile(form.mobile)) { <span class="error-text">يجب أن يحتوي رقم الهاتف على أرقام فقط.</span> }
+        </label>
+        <label>
+          <span>البريد</span>
+          <input [(ngModel)]="form.email" />
+          @if (!form.email.trim()) { <span class="error-text">البريد الإلكتروني مطلوب.</span> }
+          @else if (!isValidEmail(form.email)) { <span class="error-text">البريد الإلكتروني غير صحيح.</span> }
+        </label>
       </div>
       <div class="modal-actions">
         <button type="button" class="btn btn-ghost" (click)="showForm.set(false)">إلغاء</button>
-        <button type="button" class="btn btn-primary" (click)="save()">حفظ</button>
+        <button type="button" class="btn btn-primary" [disabled]="!form.name.trim() || !form.mobile.trim() || !isValidMobile(form.mobile) || !form.email.trim() || !isValidEmail(form.email)" (click)="save()">حفظ</button>
       </div>
     </div>
   </div>
@@ -59,10 +73,14 @@
   <div class="modal-backdrop" (click)="showPayment.set(false)">
     <div class="modal" (click)="$event.stopPropagation()">
       <h2>دفعة للمورد — {{ selected()?.name }}</h2>
-      <label class="full-label"><span>المبلغ</span><input type="number" [(ngModel)]="paymentAmount" /></label>
+      <label class="full-label">
+        <span>المبلغ</span>
+        <input type="number" min="0" [(ngModel)]="paymentAmount" />
+        @if (paymentAmount <= 0) { <span class="error-text">يجب أن تكون قيمة الدفعة أكبر من الصفر.</span> }
+      </label>
       <div class="modal-actions">
         <button type="button" class="btn btn-ghost" (click)="showPayment.set(false)">إلغاء</button>
-        <button type="button" class="btn btn-primary" (click)="submitPayment()">تسجيل</button>
+        <button type="button" class="btn btn-primary" [disabled]="paymentAmount <= 0" (click)="submitPayment()">تسجيل</button>
       </div>
     </div>
   </div>

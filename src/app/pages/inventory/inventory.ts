@@ -59,6 +59,14 @@ export class InventoryComponent implements OnInit {
   }
 
   submitAdjust(): void {
+    if (!this.adjustForm.productId) {
+      this.toast.error('يرجى اختيار الصنف أولاً.');
+      return;
+    }
+    if (this.adjustForm.newQuantity < 0) {
+      this.toast.error('لا يمكن إدخال أرقام سالبة.');
+      return;
+    }
     this.api.adjustStock(this.adjustForm.productId, this.adjustForm.newQuantity, this.adjustForm.reason).subscribe({
       next: () => {
         this.toast.success('تم تعديل المخزون');
@@ -84,7 +92,7 @@ export class InventoryComponent implements OnInit {
   saveSellingPrice(product: Product, unit: ProductUnit): void {
     const sellingPrice = this.priceDraft(unit.id);
     if (sellingPrice < 0) {
-      this.toast.error('لا يمكن أن يكون سعر البيع بالسالب');
+      this.toast.error('لا يمكن إدخال أرقام سالبة.');
       return;
     }
 

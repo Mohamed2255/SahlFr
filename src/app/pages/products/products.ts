@@ -78,6 +78,12 @@ export class ProductsComponent implements OnInit {
   }
 
   save(): void {
+    // Validate non-negative numbers
+    if (this.form.minQuantity < 0) {
+      this.toast.error('لا يمكن إدخال أرقام سالبة.');
+      return;
+    }
+
     if (this.editing()) {
       this.api.updateProduct(this.editing()!.id, {
         name: this.form.name, sku: this.form.sku, barcode: this.form.barcode,
@@ -89,6 +95,23 @@ export class ProductsComponent implements OnInit {
         error: (e) => this.toast.error(getApiErrorMessage(e))
       });
     } else {
+      if (this.form.initialQuantity < 0) {
+        this.toast.error('لا يمكن إدخال أرقام سالبة.');
+        return;
+      }
+      if (this.form.costPrice < 0) {
+        this.toast.error('لا يمكن إدخال أرقام سالبة.');
+        return;
+      }
+      if (this.form.sellingPrice < 0) {
+        this.toast.error('لا يمكن إدخال أرقام سالبة.');
+        return;
+      }
+      if (this.form.sellingPrice <= this.form.costPrice) {
+        this.toast.error('يجب أن يكون سعر البيع أكبر من سعر التكلفة.');
+        return;
+      }
+
       this.api.createProduct({
         name: this.form.name, sku: this.form.sku, barcode: this.form.barcode,
         description: this.form.description, imageUrl: this.form.imageUrl,

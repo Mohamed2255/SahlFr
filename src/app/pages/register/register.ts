@@ -59,6 +59,10 @@ export class RegisterComponent implements OnInit {
   }
 
   openRegister(): void {
+    if (this.openForm.openingBalance < 0) {
+      this.toast.error('لا يمكن إدخال أرقام سالبة.');
+      return;
+    }
     this.submitting.set(true);
     this.api.openCashRegister({
       businessDate: this.openForm.businessDate || undefined,
@@ -81,6 +85,11 @@ export class RegisterComponent implements OnInit {
   closeRegister(): void {
     const register = this.current();
     if (!register) return;
+
+    if (this.closeForm.actualClosingBalance != null && this.closeForm.actualClosingBalance < 0) {
+      this.toast.error('لا يمكن إدخال أرقام سالبة.');
+      return;
+    }
 
     this.submitting.set(true);
     this.api.closeCashRegister(register.id, {

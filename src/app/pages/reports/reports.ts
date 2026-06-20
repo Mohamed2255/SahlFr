@@ -25,6 +25,7 @@ export class ReportsComponent implements OnInit {
 
   startDate = '';
   endDate = '';
+  today = toDateInputValue(new Date());
   salesPeriod = 'daily';
 
   constructor(private readonly api: ApiService) {}
@@ -62,6 +63,14 @@ export class ReportsComponent implements OnInit {
   }
 
   loadTab(): void {
+    const todayStr = toDateInputValue(new Date());
+    if (this.tab() !== 'inventory' && this.tab() !== 'aging') {
+      if ((this.startDate && this.startDate > todayStr) || (this.endDate && this.endDate > todayStr)) {
+        this.error.set('لا يمكن اختيار تاريخ أكبر من تاريخ اليوم.');
+        return;
+      }
+    }
+
     this.loading.set(true);
     this.error.set('');
     const tab = this.tab();

@@ -39,7 +39,36 @@ export class VendorsComponent implements OnInit {
     this.showForm.set(true);
   }
 
+  isValidMobile(mobile: string): boolean {
+    return /^[0-9]+$/.test(mobile);
+  }
+
+  isValidEmail(email: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
   save(): void {
+    if (!this.form.name.trim()) {
+      this.toast.error('الاسم مطلوب.');
+      return;
+    }
+    if (!this.form.mobile.trim()) {
+      this.toast.error('رقم الهاتف مطلوب.');
+      return;
+    }
+    if (!this.isValidMobile(this.form.mobile)) {
+      this.toast.error('يجب أن يحتوي رقم الهاتف على أرقام فقط.');
+      return;
+    }
+    if (!this.form.email.trim()) {
+      this.toast.error('البريد الإلكتروني مطلوب.');
+      return;
+    }
+    if (!this.isValidEmail(this.form.email)) {
+      this.toast.error('البريد الإلكتروني غير صحيح.');
+      return;
+    }
+
     this.api.upsertVendor({ ...this.form, id: this.form.id || undefined }).subscribe({
       next: () => { this.toast.success('تم الحفظ'); this.showForm.set(false); this.ngOnInit(); },
       error: (e) => this.toast.error(getApiErrorMessage(e))
@@ -60,6 +89,10 @@ export class VendorsComponent implements OnInit {
   submitPayment(): void {
     const v = this.selected();
     if (!v) return;
+    if (this.paymentAmount <= 0) {
+      this.toast.error('يجب أن تكون قيمة الدفعة أكبر من الصفر.');
+      return;
+    }
     this.api.recordVendorPayment(v.id, this.paymentAmount).subscribe({
       next: () => { this.toast.success('تم تسجيل الدفعة'); this.showPayment.set(false); this.ngOnInit(); },
       error: (e) => this.toast.error(getApiErrorMessage(e))

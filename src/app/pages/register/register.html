@@ -47,6 +47,7 @@
         <div class="detail-row">
           <span>النقد الفعلي</span>
           <input type="number" [(ngModel)]="closeForm.actualClosingBalance" min="0" step="0.01" />
+          @if (closeForm.actualClosingBalance != null && closeForm.actualClosingBalance < 0) { <span class="error-text">لا يمكن إدخال أرقام سالبة.</span> }
         </div>
         <div class="detail-row">
           <span>الفرق</span>
@@ -109,6 +110,7 @@
       <label>
         <span>الرصيد الافتتاحي</span>
         <input type="number" [(ngModel)]="openForm.openingBalance" min="0" step="0.01" />
+        @if (openForm.openingBalance < 0) { <span class="error-text">لا يمكن إدخال أرقام سالبة.</span> }
       </label>
     </div>
 

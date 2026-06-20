@@ -14,8 +14,16 @@
 
 @if (tab() !== 'inventory' && tab() !== 'aging') {
   <div class="form-row filter-row">
-    <label><span>من</span><input type="date" [(ngModel)]="startDate" /></label>
-    <label><span>إلى</span><input type="date" [(ngModel)]="endDate" /></label>
+    <label>
+      <span>من</span>
+      <input type="date" [max]="today" [(ngModel)]="startDate" />
+      @if (startDate && startDate > today) { <span class="error-text">لا يمكن اختيار تاريخ أكبر من تاريخ اليوم.</span> }
+    </label>
+    <label>
+      <span>إلى</span>
+      <input type="date" [max]="today" [(ngModel)]="endDate" />
+      @if (endDate && endDate > today) { <span class="error-text">لا يمكن اختيار تاريخ أكبر من تاريخ اليوم.</span> }
+    </label>
     @if (tab() === 'sales') {
       <label><span>الفترة</span>
         <select [(ngModel)]="salesPeriod">
@@ -26,7 +34,7 @@
         </select>
       </label>
     }
-    <button type="button" class="btn btn-primary" (click)="loadTab()">تحديث</button>
+    <button type="button" class="btn btn-primary" [disabled]="(startDate && startDate > today) || (endDate && endDate > today)" (click)="loadTab()">تحديث</button>
   </div>
 }
 

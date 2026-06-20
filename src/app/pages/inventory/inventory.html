@@ -115,13 +115,18 @@
               <option [value]="p.id">{{ p.name }} ({{ p.stockQuantity }})</option>
             }
           </select>
+          @if (!adjustForm.productId) { <span class="error-text">يرجى اختيار الصنف أولاً.</span> }
         </label>
-        <label><span>الكمية الجديدة</span><input type="number" [(ngModel)]="adjustForm.newQuantity" /></label>
+        <label>
+          <span>الكمية الجديدة</span>
+          <input type="number" min="0" [(ngModel)]="adjustForm.newQuantity" />
+          @if (adjustForm.newQuantity < 0) { <span class="error-text">لا يمكن إدخال أرقام سالبة.</span> }
+        </label>
         <label><span>السبب</span><input [(ngModel)]="adjustForm.reason" placeholder="سبب التعديل..." /></label>
       </div>
       <div class="modal-actions">
         <button type="button" class="btn btn-ghost" (click)="showAdjust.set(false)">إلغاء</button>
-        <button type="button" class="btn btn-primary" (click)="submitAdjust()">حفظ</button>
+        <button type="button" class="btn btn-primary" [disabled]="!adjustForm.productId || adjustForm.newQuantity < 0" (click)="submitAdjust()">حفظ</button>
       </div>
     </div>
   </div>

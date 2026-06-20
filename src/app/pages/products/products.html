@@ -78,12 +78,29 @@
             @for (c of categories(); track c.id) { <option [value]="c.id">{{ c.name }}</option> }
           </select>
         </label>
-        <label><span>الحد الأدنى</span><input type="number" [(ngModel)]="form.minQuantity" /></label>
+        <label>
+          <span>الحد الأدنى</span>
+          <input type="number" min="0" [(ngModel)]="form.minQuantity" />
+          @if (form.minQuantity < 0) { <span class="error-text">لا يمكن إدخال أرقام سالبة.</span> }
+        </label>
         @if (!editing()) {
-          <label><span>الكمية الابتدائية</span><input type="number" [(ngModel)]="form.initialQuantity" /></label>
+          <label>
+            <span>الكمية الابتدائية</span>
+            <input type="number" min="0" [(ngModel)]="form.initialQuantity" />
+            @if (form.initialQuantity < 0) { <span class="error-text">لا يمكن إدخال أرقام سالبة.</span> }
+          </label>
           <label><span>اسم الوحدة</span><input [(ngModel)]="form.unitName" /></label>
-          <label><span>سعر التكلفة</span><input type="number" [(ngModel)]="form.costPrice" /></label>
-          <label><span>سعر البيع</span><input type="number" [(ngModel)]="form.sellingPrice" /></label>
+          <label>
+            <span>سعر التكلفة</span>
+            <input type="number" min="0" [(ngModel)]="form.costPrice" />
+            @if (form.costPrice < 0) { <span class="error-text">لا يمكن إدخال أرقام سالبة.</span> }
+          </label>
+          <label>
+            <span>سعر البيع</span>
+            <input type="number" min="0" [(ngModel)]="form.sellingPrice" />
+            @if (form.sellingPrice < 0) { <span class="error-text">لا يمكن إدخال أرقام سالبة.</span> }
+            @if (form.sellingPrice > 0 && form.sellingPrice <= form.costPrice) { <span class="error-text">يجب أن يكون سعر البيع أكبر من سعر التكلفة.</span> }
+          </label>
         }
         @if (editing()) {
           <label><span>نشط</span><select [(ngModel)]="form.isActive"><option [ngValue]="true">نعم</option><option [ngValue]="false">لا</option></select></label>
@@ -92,7 +109,7 @@
       <label class="full-label"><span>الوصف</span><textarea [(ngModel)]="form.description" rows="2"></textarea></label>
       <div class="modal-actions">
         <button type="button" class="btn btn-ghost" (click)="showModal.set(false)">إلغاء</button>
-        <button type="button" class="btn btn-primary" (click)="save()">حفظ</button>
+        <button type="button" class="btn btn-primary" [disabled]="form.minQuantity < 0 || (!editing() && (form.initialQuantity < 0 || form.costPrice < 0 || form.sellingPrice < 0 || form.sellingPrice <= form.costPrice))" (click)="save()">حفظ</button>
       </div>
     </div>
   </div>
