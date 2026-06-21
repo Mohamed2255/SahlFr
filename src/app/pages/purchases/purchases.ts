@@ -110,6 +110,7 @@ export class PurchasesComponent implements OnInit {
         { product, unit, quantity: this.quantity, unitPrice: this.unitPrice }
       ]);
     }
+    
     this.quantity = 1;
   }
 
