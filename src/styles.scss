@@ -287,6 +287,22 @@ table {
   }
 }
 
+.btn-success {
+  background: var(--success);
+  color: #fff;
+  &:not(:disabled):hover {
+    background: #059669;
+  }
+}
+
+.btn-warning {
+  background: var(--warning);
+  color: #fff;
+  &:not(:disabled):hover {
+    background: #d97706;
+  }
+}
+
 .btn-secondary {
   background: var(--accent-soft);
   color: var(--accent);

@@ -1,0 +1,72 @@
+<div class="page-header">
+  <div>
+    <h1>إدارة الاشتراك</h1>
+    <p>إدارة وتفعيل رخصة استخدام النظام</p>
+  </div>
+</div>
+
+<div class="subscription-container">
+  @if (loading()) {
+    <div class="loading-state">جاري تحميل البيانات...</div>
+  } @else if (subStatus(); as sub) {
+    <div class="panel">
+      @if (!sub.isRegistered) {
+        <div class="registration-form">
+          <h2>تسجيل نسخة النظام</h2>
+          <p class="muted">الرجاء تسجيل اسم شركتك لبدء الفترة التجريبية (30 يوم).</p>
+          <div class="form-group">
+            <label>اسم الشركة / المؤسسة</label>
+            <input type="text" class="input" [(ngModel)]="companyName" placeholder="أدخل اسم شركتك هنا" />
+          </div>
+          <button class="btn btn-primary" (click)="register()" [disabled]="!companyName()">تسجيل وبدء الفترة التجريبية</button>
+        </div>
+      } @else {
+        <div class="subscription-details">
+          <h2>حالة الاشتراك لشركة: {{ sub.companyName }}</h2>
+          
+          <div class="status-grid">
+            <div class="stat-item">
+              <span class="label">الحالة:</span>
+              @if (sub.status === 1) { <span class="badge warning">فترة تجريبية</span> }
+              @else if (sub.status === 2) { <span class="badge success">مفعل</span> }
+              @else if (sub.status === 3) { <span class="badge danger">منتهي</span> }
+              @else { <span class="badge danger">موقوف</span> }
+            </div>
+            
+            <div class="stat-item">
+              <span class="label">تاريخ بدء التجربة:</span>
+              <strong>{{ formatDate(sub.trialStartDate) }}</strong>
+            </div>
+
+            <div class="stat-item">
+              <span class="label">تاريخ الانتهاء:</span>
+              <strong>{{ formatDate(sub.trialEndDate) }}</strong>
+            </div>
+
+            @if (sub.status === 1) {
+              <div class="stat-item">
+                <span class="label">الأيام المتبقية:</span>
+                <strong>{{ sub.daysRemaining }} يوم</strong>
+              </div>
+            }
+          </div>
+
+          @if (sub.isExpired) {
+            <div class="alert danger" style="margin-top: 20px;">
+              لقد انتهت صلاحية استخدامك للنظام. الرجاء تفعيل الاشتراك للتمكن من استخدام وحدات النظام.
+            </div>
+          }
+
+          @if (auth.isSuperAdmin()) {
+            <hr />
+            <h3>إجراءات الإدارة</h3>
+            <div class="admin-actions">
+              <button class="btn btn-success" (click)="activate()" [disabled]="sub.status === 2">تفعيل النسخة نهائياً</button>
+              <button class="btn btn-warning" (click)="extend()">تمديد التجربة (30 يوم)</button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

@@ -16,6 +16,7 @@ export class AuthService {
   readonly isAuthenticated = computed(() => !!this.tokenSignal());
   readonly currentUser = computed(() => this.userSignal());
   readonly isAdmin = computed(() => this.userSignal()?.role === 'Admin');
+  readonly isSuperAdmin = computed(() => this.userSignal()?.role === 'SuperAdmin');
 
   constructor(
     private readonly http: HttpClient,

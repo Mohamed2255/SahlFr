@@ -1,0 +1,59 @@
+.subscription-container {
+  max-width: 600px;
+  margin: 0 auto;
+
+  .registration-form {
+    text-align: center;
+    padding: 20px;
+
+    .form-group {
+      text-align: right;
+      margin: 20px 0;
+      
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+      }
+      
+      input {
+        width: 100%;
+      }
+    }
+
+    button {
+      width: 100%;
+    }
+  }
+
+  .subscription-details {
+    .status-grid {
+      display: grid;
+      gap: 15px;
+      margin: 20px 0;
+
+      .stat-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        background: var(--surface-dim);
+        border-radius: 8px;
+
+        .label {
+          color: var(--text-muted);
+        }
+      }
+    }
+
+    .admin-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+
+      button {
+        flex: 1;
+      }
+    }
+  }
+}
