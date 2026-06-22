@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { Chart, registerables } from 'chart.js';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
+import { SubscriptionService, SubscriptionStatusDto } from '../../core/services/subscription.service';
 import { DashboardData } from '../../core/models';
 import { formatCurrency, formatDate } from '../../core/utils/helpers';
 
@@ -22,13 +23,20 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   protected readonly data = signal<DashboardData | null>(null);
   protected readonly formatCurrency = formatCurrency;
   protected readonly formatDate = formatDate;
+  protected readonly subStatus = signal<SubscriptionStatusDto | null>(null);
 
   constructor(
     protected readonly auth: AuthService,
-    private readonly api: ApiService
+    private readonly api: ApiService,
+    private readonly subService: SubscriptionService
   ) {}
 
   ngOnInit(): void {
+    this.subService.getStatus().subscribe({
+      next: (s) => this.subStatus.set(s),
+      error: () => {}
+    });
+
     this.api.getDashboard().subscribe({
       next: (d) => {
         this.data.set(d);

@@ -58,6 +58,10 @@ export const routes: Routes = [
         path: 'users',
         canActivate: [adminGuard],
         loadComponent: () => import('./pages/users/users').then((m) => m.UsersComponent)
+      },
+      {
+        path: 'subscription',
+        loadComponent: () => import('./pages/subscription/subscription').then((m) => m.SubscriptionComponent)
       }
     ]
   },

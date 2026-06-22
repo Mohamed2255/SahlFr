@@ -5,6 +5,23 @@
   </div>
 </div>
 
+@if (subStatus(); as sub) {
+  @if (sub.isRegistered && sub.status === 1) {
+    @if (sub.daysRemaining <= 7) {
+      <div class="alert danger" style="margin-bottom: 20px; padding: 15px; border-radius: 8px; background-color: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);">
+        <strong>تنبيه الفترة التجريبية:</strong> 
+        يتبقى {{ sub.daysRemaining }} يوم على انتهاء الفترة التجريبية. 
+        الرجاء تفعيل الاشتراك لضمان استمرار عمل النظام.
+      </div>
+    } @else {
+      <div class="alert warning" style="margin-bottom: 20px; padding: 15px; border-radius: 8px; background-color: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2);">
+        <strong>الفترة التجريبية نشطة:</strong> 
+        يتبقى {{ sub.daysRemaining }} يوم.
+      </div>
+    }
+  }
+}
+
 @if (loading()) {
   <div class="loading-state">جاري تحميل البيانات...</div>
 } @else if (data(); as d) {
